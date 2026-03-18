@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import ShopMap from '@/components/ShopMap';
+import dynamic from 'next/dynamic';
+
+const ShopMap = dynamic(() => import('@/components/ShopMap'), { ssr: false });
 import ShopSidebar from '@/components/ShopSidebar';
 import type { Shop, ShopRow } from '@/types';
 

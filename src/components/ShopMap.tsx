@@ -1,15 +1,37 @@
 'use client';
 
-import { useCallback } from 'react';
-import {
-  APIProvider,
-  Map,
-  AdvancedMarker,
-  InfoWindow,
-  useAdvancedMarkerRef,
-} from '@vis.gl/react-google-maps';
-import { DEFAULT_CENTER, DEFAULT_ZOOM, GOOGLE_MAPS_API_KEY } from '@/lib/google-maps';
+import { useCallback, useEffect, useState } from 'react';
+import { DEFAULT_CENTER, DEFAULT_ZOOM } from '@/lib/google-maps';
 import type { Shop } from '@/types';
+
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMap,
+} from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Custom red marker icon
+const defaultIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
+const selectedIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  iconSize: [30, 49],
+  iconAnchor: [15, 49],
+  popupAnchor: [1, -40],
+  shadowSize: [41, 41],
+});
 
 interface ShopMapProps {
   shops: Shop[];
@@ -18,56 +40,14 @@ interface ShopMapProps {
   className?: string;
 }
 
-function ShopPin({
-  shop,
-  isSelected,
-  onClick,
-}: {
-  shop: Shop;
-  isSelected: boolean;
-  onClick: () => void;
-}) {
-  const [markerRef, marker] = useAdvancedMarkerRef();
-
-  return (
-    <>
-      <AdvancedMarker
-        ref={markerRef}
-        position={shop.location}
-        onClick={onClick}
-      >
-        <div
-          className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg transition-transform ${
-            isSelected ? 'scale-125 bg-[#E3350D]' : 'bg-[#E3350D]/80 hover:bg-[#E3350D]'
-          }`}
-        >
-          🃏
-        </div>
-      </AdvancedMarker>
-      {isSelected && marker && (
-        <InfoWindow anchor={marker} onCloseClick={() => onClick()}>
-          <div className="p-1 max-w-[200px]">
-            <h3 className="font-bold text-sm">{shop.name_en}</h3>
-            <p className="text-xs text-gray-500">{shop.name_jp}</p>
-            {shop.google_rating && (
-              <p className="text-xs mt-1">
-                <span className="text-yellow-500">★</span> {shop.google_rating}
-                <span className="text-gray-400 ml-1">
-                  ({shop.google_review_count})
-                </span>
-              </p>
-            )}
-            <a
-              href={`/shops/${shop.id}`}
-              className="text-xs text-[#E3350D] hover:underline mt-1 inline-block"
-            >
-              View Details →
-            </a>
-          </div>
-        </InfoWindow>
-      )}
-    </>
-  );
+function FlyToSelected({ shop }: { shop: Shop | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (shop) {
+      map.flyTo([shop.location.lat, shop.location.lng], 17, { duration: 0.5 });
+    }
+  }, [shop, map]);
+  return null;
 }
 
 export default function ShopMap({
@@ -76,6 +56,12 @@ export default function ShopMap({
   onSelectShop,
   className,
 }: ShopMapProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const handleMarkerClick = useCallback(
     (shop: Shop) => {
       onSelectShop(selectedShop?.id === shop.id ? null : shop);
@@ -83,29 +69,61 @@ export default function ShopMap({
     [selectedShop, onSelectShop]
   );
 
+  if (!mounted) {
+    return (
+      <div className={`${className} bg-gray-100 flex items-center justify-center`}>
+        <p className="text-sm text-muted-foreground">Loading map...</p>
+      </div>
+    );
+  }
+
   return (
-    <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
-      <Map
-        className={className}
-        defaultCenter={DEFAULT_CENTER}
-        defaultZoom={DEFAULT_ZOOM}
-        mapId="cardmapjp-main"
-        gestureHandling="greedy"
-        disableDefaultUI={false}
-        zoomControl={true}
-        streetViewControl={false}
-        mapTypeControl={false}
-        fullscreenControl={false}
-      >
-        {shops.map((shop) => (
-          <ShopPin
+    <MapContainer
+      center={[DEFAULT_CENTER.lat, DEFAULT_CENTER.lng]}
+      zoom={DEFAULT_ZOOM}
+      className={className}
+      style={{ height: '100%', width: '100%' }}
+      zoomControl={true}
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      <FlyToSelected shop={selectedShop} />
+      {shops.map((shop) => {
+        const isSelected = selectedShop?.id === shop.id;
+        return (
+          <Marker
             key={shop.id}
-            shop={shop}
-            isSelected={selectedShop?.id === shop.id}
-            onClick={() => handleMarkerClick(shop)}
-          />
-        ))}
-      </Map>
-    </APIProvider>
+            position={[shop.location.lat, shop.location.lng]}
+            icon={isSelected ? selectedIcon : defaultIcon}
+            eventHandlers={{
+              click: () => handleMarkerClick(shop),
+            }}
+          >
+            <Popup>
+              <div className="min-w-[180px]">
+                <h3 className="font-bold text-sm">{shop.name_en}</h3>
+                <p className="text-xs text-gray-500">{shop.name_jp}</p>
+                {shop.google_rating && (
+                  <p className="text-xs mt-1">
+                    <span className="text-yellow-500">★</span> {shop.google_rating}
+                    <span className="text-gray-400 ml-1">
+                      ({shop.google_review_count})
+                    </span>
+                  </p>
+                )}
+                <a
+                  href={`/shops/${shop.id}`}
+                  className="text-xs text-[#E3350D] hover:underline mt-2 inline-block font-medium"
+                >
+                  View Details →
+                </a>
+              </div>
+            </Popup>
+          </Marker>
+        );
+      })}
+    </MapContainer>
   );
 }
