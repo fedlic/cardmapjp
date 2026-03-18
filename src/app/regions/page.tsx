@@ -3,13 +3,13 @@ import { Badge } from '@/components/ui/badge';
 
 const REGIONS = [
   { name: 'Akihabara', city: 'Tokyo', status: 'live' as const, shops: 78, href: '/regions/akihabara' },
+  { name: 'Nipponbashi', city: 'Osaka', status: 'live' as const, shops: 20 },
+  { name: 'Osu', city: 'Nagoya', status: 'live' as const, shops: 15 },
+  { name: 'Tenjin / Hakata', city: 'Fukuoka', status: 'live' as const, shops: 15 },
   { name: 'Shibuya', city: 'Tokyo', status: 'coming' as const },
   { name: 'Shinjuku', city: 'Tokyo', status: 'coming' as const },
   { name: 'Ikebukuro', city: 'Tokyo', status: 'coming' as const },
-  { name: 'Nipponbashi', city: 'Osaka', status: 'coming' as const },
-  { name: 'Osu', city: 'Nagoya', status: 'coming' as const },
   { name: 'Teramachi', city: 'Kyoto', status: 'coming' as const },
-  { name: 'Tenjin', city: 'Fukuoka', status: 'coming' as const },
 ];
 
 export default function RegionsPage() {

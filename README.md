@@ -12,7 +12,7 @@ Find the best Pokemon card shops in Akihabara and across Japan with real-time in
 
 ### Interactive Map
 - OpenStreetMap-based map powered by Leaflet/react-leaflet
-- 78 card shops plotted across Akihabara
+- 128 card shops across 4 regions (Akihabara, Nipponbashi, Osu, Tenjin/Hakata)
 - Click markers to view shop summary, fly-to animation on selection
 - Color-coded markers (red = default, gold = selected)
 
@@ -48,8 +48,11 @@ Find the best Pokemon card shops in Akihabara and across Japan with real-time in
 | Accessories | Sleeves, playmats, deck boxes |
 
 ### Regions Page (`/regions`)
-- Akihabara (Live - 78 shops)
-- Coming soon: Shibuya, Shinjuku, Ikebukuro, Nipponbashi (Osaka), Osu (Nagoya), Teramachi (Kyoto), Tenjin (Fukuoka)
+- Akihabara, Tokyo (Live - 78 shops)
+- Nipponbashi, Osaka (Live - 20 shops)
+- Osu, Nagoya (Live - 15 shops)
+- Tenjin / Hakata, Fukuoka (Live - 15 shops)
+- Coming soon: Shibuya, Shinjuku, Ikebukuro, Teramachi (Kyoto)
 
 ### SEO
 - Dynamic `sitemap.xml` with all shop and region pages
@@ -157,8 +160,11 @@ cardmapjp/
 │   ├── migrations/
 │   │   ├── 001_initial.sql             # Core schema (6 tables)
 │   │   └── 002_views_and_functions.sql # PostGIS views & functions
-│   ├── seed.sql                        # Original 10 shops
-│   ├── seed_additional.sql             # 68 additional shops
+│   ├── seed.sql                        # Original 10 shops (Akihabara)
+│   ├── seed_additional.sql             # 68 additional Akihabara shops
+│   ├── seed_osaka.sql                  # 20 Nipponbashi (Osaka) shops
+│   ├── seed_nagoya.sql                 # 15 Osu (Nagoya) shops
+│   ├── seed_fukuoka.sql                # 15 Tenjin/Hakata (Fukuoka) shops
 │   ├── enrich_original_10.sql          # Enriched inventory for original 10
 │   └── enrich_additional_part[1-3].sql # Inventory for all 68 shops
 └── .env.local                          # Environment variables
@@ -281,14 +287,14 @@ Open [http://localhost:3000](http://localhost:3000)
 
 | Region | Shops | Status |
 |--------|-------|--------|
-| Akihabara | 78 | Live |
-| Shibuya | - | Planned |
-| Shinjuku | - | Planned |
-| Ikebukuro | - | Planned |
-| Nipponbashi (Osaka) | - | Planned |
-| Osu (Nagoya) | - | Planned |
+| Akihabara (Tokyo) | 78 | Live |
+| Nipponbashi (Osaka) | 20 | Live |
+| Osu (Nagoya) | 15 | Live |
+| Tenjin / Hakata (Fukuoka) | 15 | Live |
+| Shibuya (Tokyo) | - | Planned |
+| Shinjuku (Tokyo) | - | Planned |
+| Ikebukuro (Tokyo) | - | Planned |
 | Teramachi (Kyoto) | - | Planned |
-| Tenjin (Fukuoka) | - | Planned |
 
 ---
 
