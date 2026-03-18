@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import ShopSidebar from '@/components/ShopSidebar';
 import { useShopPreferences } from '@/hooks/useShopPreferences';
 import { useGeolocation } from '@/hooks/useGeolocation';
+import { REGION_CENTERS } from '@/lib/regions';
 import type { MapBounds } from '@/components/ShopMap';
 import type { Shop } from '@/types';
 
@@ -15,10 +17,17 @@ interface HomePageClientProps {
 }
 
 export default function HomePageClient({ shops }: HomePageClientProps) {
+  const searchParams = useSearchParams();
   const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
   const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
   const preferences = useShopPreferences();
   const { position: userLocation, status: geoStatus, error: geoError, requestLocation } = useGeolocation();
+
+  const regionParam = searchParams.get('region');
+  const regionCenter = useMemo(() => {
+    if (!regionParam) return null;
+    return REGION_CENTERS[regionParam] ?? null;
+  }, [regionParam]);
 
   const handleSelectShop = useCallback((shop: Shop | null) => {
     setSelectedShop(shop);
@@ -38,6 +47,8 @@ export default function HomePageClient({ shops }: HomePageClientProps) {
           onSelectShop={handleSelectShop}
           onBoundsChange={handleBoundsChange}
           userLocation={userLocation}
+          initialCenter={regionCenter}
+          initialZoom={regionCenter ? 15 : undefined}
           className="w-full h-full"
         />
       </div>

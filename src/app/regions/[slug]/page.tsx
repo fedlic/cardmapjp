@@ -103,7 +103,7 @@ export default async function RegionPage({ params }: PageProps) {
             </span>
           </div>
           <a
-            href="/"
+            href={`/?region=${slug}`}
             className="inline-block mt-4 bg-white text-[#E3350D] font-semibold rounded-lg px-5 py-2 text-sm hover:bg-white/90 transition"
           >
             Open Interactive Map
@@ -238,7 +238,7 @@ export default async function RegionPage({ params }: PageProps) {
         {/* Bottom CTA */}
         <div className="text-center mt-8 mb-4">
           <a
-            href="/"
+            href={`/?region=${slug}`}
             className="inline-block bg-[#E3350D] text-white font-semibold rounded-lg px-6 py-3 hover:bg-[#c42d0b] transition"
           >
             Explore All Shops on the Map

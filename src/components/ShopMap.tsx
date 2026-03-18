@@ -55,6 +55,8 @@ interface ShopMapProps {
   onSelectShop: (shop: Shop | null) => void;
   onBoundsChange?: (bounds: MapBounds) => void;
   userLocation?: GeoPosition | null;
+  initialCenter?: { lat: number; lng: number } | null;
+  initialZoom?: number;
   className?: string;
 }
 
@@ -108,6 +110,8 @@ export default function ShopMap({
   onSelectShop,
   onBoundsChange,
   userLocation,
+  initialCenter,
+  initialZoom,
   className,
 }: ShopMapProps) {
   const [mounted, setMounted] = useState(false);
@@ -135,8 +139,8 @@ export default function ShopMap({
 
   return (
     <MapContainer
-      center={[DEFAULT_CENTER.lat, DEFAULT_CENTER.lng]}
-      zoom={DEFAULT_ZOOM}
+      center={[initialCenter?.lat ?? DEFAULT_CENTER.lat, initialCenter?.lng ?? DEFAULT_CENTER.lng]}
+      zoom={initialZoom ?? DEFAULT_ZOOM}
       className={className}
       style={{ height: '100%', width: '100%' }}
       zoomControl={true}

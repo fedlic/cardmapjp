@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { createServerClient } from '@/lib/supabase/server';
 import HomePageClient from '@/components/HomePageClient';
@@ -57,5 +58,9 @@ export default async function HomePage() {
 
   const shops = (data as unknown as ShopRow[]).map(rowToShop);
 
-  return <HomePageClient shops={shops} />;
+  return (
+    <Suspense>
+      <HomePageClient shops={shops} />
+    </Suspense>
+  );
 }

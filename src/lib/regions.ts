@@ -902,3 +902,30 @@ export const ALL_REGION_SLUGS = Object.keys(REGION_CONFIGS);
 export function getRegionConfig(slug: string): RegionConfig | undefined {
   return REGION_CONFIGS[slug];
 }
+
+/** Center coordinates for all 23 regions (used for map navigation) */
+export const REGION_CENTERS: Record<string, { lat: number; lng: number }> = {
+  akihabara: { lat: 35.6984, lng: 139.7731 },
+  ikebukuro: { lat: 35.7295, lng: 139.7109 },
+  shibuya: { lat: 35.6580, lng: 139.7016 },
+  shinjuku: { lat: 35.6938, lng: 139.7034 },
+  nakano: { lat: 35.7074, lng: 139.6659 },
+  machida: { lat: 35.5424, lng: 139.4460 },
+  tachikawa: { lat: 35.6980, lng: 139.4142 },
+  yokohama: { lat: 35.4437, lng: 139.6380 },
+  omiya: { lat: 35.9062, lng: 139.6237 },
+  chiba: { lat: 35.6131, lng: 140.1134 },
+  nipponbashi: { lat: 34.6595, lng: 135.5054 },
+  kyoto: { lat: 35.0048, lng: 135.7670 },
+  kobe: { lat: 34.6932, lng: 135.1956 },
+  osu: { lat: 35.1584, lng: 136.9066 },
+  niigata: { lat: 37.9161, lng: 139.0364 },
+  kanazawa: { lat: 36.5613, lng: 136.6562 },
+  'tenjin-hakata': { lat: 33.5902, lng: 130.3986 },
+  kumamoto: { lat: 32.8032, lng: 130.7079 },
+  naha: { lat: 26.3344, lng: 127.6809 },
+  hiroshima: { lat: 34.3955, lng: 132.4596 },
+  okayama: { lat: 34.6551, lng: 133.9195 },
+  sapporo: { lat: 43.0621, lng: 141.3544 },
+  sendai: { lat: 38.2601, lng: 140.8826 },
+};

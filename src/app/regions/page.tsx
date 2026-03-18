@@ -3,43 +3,44 @@ import { Badge } from '@/components/ui/badge';
 
 interface RegionItem {
   name: string;
+  slug: string;
   city: string;
   status: 'live' | 'coming';
   shops?: number;
-  href?: string;
+  hasLandingPage?: boolean;
 }
 
 const REGIONS: RegionItem[] = [
   // Tokyo
-  { name: 'Akihabara', city: 'Tokyo', status: 'live', shops: 78, href: '/regions/akihabara' },
-  { name: 'Ikebukuro', city: 'Tokyo', status: 'live', shops: 12, href: '/regions/ikebukuro' },
-  { name: 'Shibuya', city: 'Tokyo', status: 'live', shops: 10, href: '/regions/shibuya' },
-  { name: 'Shinjuku', city: 'Tokyo', status: 'live', shops: 8, href: '/regions/shinjuku' },
-  { name: 'Nakano', city: 'Tokyo', status: 'live', shops: 8, href: '/regions/nakano' },
+  { name: 'Akihabara', slug: 'akihabara', city: 'Tokyo', status: 'live', shops: 78, hasLandingPage: true },
+  { name: 'Ikebukuro', slug: 'ikebukuro', city: 'Tokyo', status: 'live', shops: 12 },
+  { name: 'Shibuya', slug: 'shibuya', city: 'Tokyo', status: 'live', shops: 10 },
+  { name: 'Shinjuku', slug: 'shinjuku', city: 'Tokyo', status: 'live', shops: 8 },
+  { name: 'Nakano', slug: 'nakano', city: 'Tokyo', status: 'live', shops: 8 },
+  { name: 'Tachikawa', slug: 'tachikawa', city: 'Tokyo', status: 'live', shops: 7 },
+  { name: 'Machida', slug: 'machida', city: 'Tokyo', status: 'live', shops: 6 },
   // Kanto
-  { name: 'Yokohama', city: 'Kanagawa', status: 'live', shops: 8, href: '/regions/yokohama' },
-  { name: 'Omiya', city: 'Saitama', status: 'live', shops: 7, href: '/regions/omiya' },
-  { name: 'Chiba', city: 'Chiba', status: 'live', shops: 7, href: '/regions/chiba' },
-  { name: 'Machida', city: 'Tokyo', status: 'live', shops: 6, href: '/regions/machida' },
-  { name: 'Tachikawa', city: 'Tokyo', status: 'live', shops: 7, href: '/regions/tachikawa' },
+  { name: 'Yokohama', slug: 'yokohama', city: 'Kanagawa', status: 'live', shops: 8 },
+  { name: 'Omiya', slug: 'omiya', city: 'Saitama', status: 'live', shops: 7 },
+  { name: 'Chiba', slug: 'chiba', city: 'Chiba', status: 'live', shops: 7 },
   // Kansai
-  { name: 'Nipponbashi', city: 'Osaka', status: 'live', shops: 20, href: '/regions/nipponbashi' },
-  { name: 'Teramachi / Kawaramachi', city: 'Kyoto', status: 'live', shops: 11, href: '/regions/kyoto' },
-  { name: 'Sannomiya', city: 'Kobe', status: 'live', shops: 10, href: '/regions/kobe' },
+  { name: 'Nipponbashi', slug: 'nipponbashi', city: 'Osaka', status: 'live', shops: 20, hasLandingPage: true },
+  { name: 'Teramachi / Kawaramachi', slug: 'kyoto', city: 'Kyoto', status: 'live', shops: 11 },
+  { name: 'Sannomiya', slug: 'kobe', city: 'Kobe', status: 'live', shops: 10 },
   // Chubu
-  { name: 'Osu', city: 'Nagoya', status: 'live', shops: 15, href: '/regions/osu' },
-  { name: 'Niigata', city: 'Niigata', status: 'live', shops: 6, href: '/regions/niigata' },
-  { name: 'Kanazawa', city: 'Kanazawa', status: 'live', shops: 5, href: '/regions/kanazawa' },
+  { name: 'Osu', slug: 'osu', city: 'Nagoya', status: 'live', shops: 15, hasLandingPage: true },
+  { name: 'Niigata', slug: 'niigata', city: 'Niigata', status: 'live', shops: 6 },
+  { name: 'Kanazawa', slug: 'kanazawa', city: 'Kanazawa', status: 'live', shops: 5 },
   // Kyushu / Okinawa
-  { name: 'Tenjin / Hakata', city: 'Fukuoka', status: 'live', shops: 15, href: '/regions/tenjin-hakata' },
-  { name: 'Kumamoto', city: 'Kumamoto', status: 'live', shops: 6, href: '/regions/kumamoto' },
-  { name: 'Naha', city: 'Okinawa', status: 'live', shops: 6, href: '/regions/naha' },
+  { name: 'Tenjin / Hakata', slug: 'tenjin-hakata', city: 'Fukuoka', status: 'live', shops: 15, hasLandingPage: true },
+  { name: 'Kumamoto', slug: 'kumamoto', city: 'Kumamoto', status: 'live', shops: 6 },
+  { name: 'Naha', slug: 'naha', city: 'Okinawa', status: 'live', shops: 6 },
   // Chugoku
-  { name: 'Hiroshima', city: 'Hiroshima', status: 'live', shops: 10, href: '/regions/hiroshima' },
-  { name: 'Okayama', city: 'Okayama', status: 'live', shops: 7, href: '/regions/okayama' },
+  { name: 'Hiroshima', slug: 'hiroshima', city: 'Hiroshima', status: 'live', shops: 10 },
+  { name: 'Okayama', slug: 'okayama', city: 'Okayama', status: 'live', shops: 7 },
   // Tohoku / Hokkaido
-  { name: 'Sapporo', city: 'Hokkaido', status: 'live', shops: 11, href: '/regions/sapporo' },
-  { name: 'Sendai', city: 'Miyagi', status: 'live', shops: 11, href: '/regions/sendai' },
+  { name: 'Sapporo', slug: 'sapporo', city: 'Hokkaido', status: 'live', shops: 11 },
+  { name: 'Sendai', slug: 'sendai', city: 'Miyagi', status: 'live', shops: 11 },
 ];
 
 export default function RegionsPage() {
@@ -53,7 +54,7 @@ export default function RegionsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {REGIONS.map((region) => (
           <Card
-            key={region.name}
+            key={region.slug}
             className={
               region.status === 'live'
                 ? 'border-[#E3350D] shadow-md'
@@ -74,13 +75,23 @@ export default function RegionsPage() {
                   <Badge variant="outline">Coming Soon</Badge>
                 )}
               </div>
-              {region.status === 'live' && region.href && (
-                <a
-                  href={region.href}
-                  className="text-sm text-[#E3350D] hover:underline mt-3 inline-block"
-                >
-                  Explore →
-                </a>
+              {region.status === 'live' && (
+                <div className="flex items-center gap-3 mt-3">
+                  <a
+                    href={`/?region=${region.slug}`}
+                    className="text-sm text-[#E3350D] hover:underline"
+                  >
+                    View on Map →
+                  </a>
+                  {region.hasLandingPage && (
+                    <a
+                      href={`/regions/${region.slug}`}
+                      className="text-sm text-muted-foreground hover:underline"
+                    >
+                      Guide
+                    </a>
+                  )}
+                </div>
               )}
             </CardContent>
           </Card>
