@@ -10,6 +10,7 @@ import { haversineKm } from '@/lib/geo';
 import { cn } from '@/lib/utils';
 import type { UseShopPreferencesReturn } from '@/hooks/useShopPreferences';
 import type { GeoPosition, GeoStatus } from '@/hooks/useGeolocation';
+import type { MapBounds } from '@/components/ShopMap';
 import type { Shop } from '@/types';
 
 type SortKey = 'name' | 'rating' | 'distance';
@@ -21,6 +22,7 @@ interface ShopSidebarProps {
   selectedShopId: string | null;
   onSelectShop: (shop: Shop) => void;
   preferences: UseShopPreferencesReturn;
+  mapBounds?: MapBounds | null;
   userLocation?: GeoPosition | null;
   geoStatus?: GeoStatus;
   geoError?: string | null;
@@ -43,6 +45,7 @@ export default function ShopSidebar({
   selectedShopId,
   onSelectShop,
   preferences,
+  mapBounds,
   userLocation,
   geoStatus = 'idle',
   geoError,
@@ -69,6 +72,14 @@ export default function ShopSidebar({
   const filtered = useMemo(() => {
     const list: ShopWithDistance[] = shops
       .filter((shop) => {
+        // Filter by map viewport
+        if (mapBounds) {
+          const { lat, lng } = shop.location;
+          if (
+            lat < mapBounds.south || lat > mapBounds.north ||
+            lng < mapBounds.west || lng > mapBounds.east
+          ) return false;
+        }
         if (debouncedSearch) {
           const q = debouncedSearch.toLowerCase();
           if (
@@ -103,7 +114,7 @@ export default function ShopSidebar({
     }
 
     return list;
-  }, [shops, debouncedSearch, filters, sortKey, userLocation, preferences]);
+  }, [shops, debouncedSearch, filters, sortKey, mapBounds, userLocation, preferences]);
 
   return (
     <div className="flex flex-col h-full bg-white">

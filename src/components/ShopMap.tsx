@@ -42,10 +42,18 @@ const userIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
+export interface MapBounds {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+}
+
 interface ShopMapProps {
   shops: Shop[];
   selectedShop: Shop | null;
   onSelectShop: (shop: Shop | null) => void;
+  onBoundsChange?: (bounds: MapBounds) => void;
   userLocation?: GeoPosition | null;
   className?: string;
 }
@@ -72,10 +80,33 @@ function FlyToUser({ position }: { position: GeoPosition | null }) {
   return null;
 }
 
+function BoundsTracker({ onChange }: { onChange: (bounds: MapBounds) => void }) {
+  const map = useMap();
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
+  useEffect(() => {
+    const report = () => {
+      const b = map.getBounds();
+      onChangeRef.current({
+        north: b.getNorth(),
+        south: b.getSouth(),
+        east: b.getEast(),
+        west: b.getWest(),
+      });
+    };
+    report();
+    map.on('moveend', report);
+    return () => { map.off('moveend', report); };
+  }, [map]);
+  return null;
+}
+
 export default function ShopMap({
   shops,
   selectedShop,
   onSelectShop,
+  onBoundsChange,
   userLocation,
   className,
 }: ShopMapProps) {
@@ -116,6 +147,7 @@ export default function ShopMap({
       />
       <FlyToSelected shop={selectedShop} />
       <FlyToUser position={userLocation ?? null} />
+      {onBoundsChange && <BoundsTracker onChange={onBoundsChange} />}
       {userLocation && (
         <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
           <Popup>
