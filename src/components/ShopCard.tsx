@@ -1,22 +1,23 @@
 'use client';
 
+import { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import type { Shop } from '@/types';
 
 interface ShopCardProps {
   shop: Shop;
-  onClick?: () => void;
+  onSelect: (shop: Shop) => void;
   selected?: boolean;
 }
 
-export default function ShopCard({ shop, onClick, selected }: ShopCardProps) {
+export default memo(function ShopCard({ shop, onSelect, selected }: ShopCardProps) {
   return (
     <Card
       className={`cursor-pointer transition-shadow hover:shadow-md ${
         selected ? 'ring-2 ring-[#E3350D]' : ''
       }`}
-      onClick={onClick}
+      onClick={() => onSelect(shop)}
     >
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-2">
@@ -73,4 +74,4 @@ export default function ShopCard({ shop, onClick, selected }: ShopCardProps) {
       </CardContent>
     </Card>
   );
-}
+});

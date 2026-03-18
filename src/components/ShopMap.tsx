@@ -62,11 +62,13 @@ export default function ShopMap({
     setMounted(true);
   }, []);
 
+  const selectedShopId = selectedShop?.id ?? null;
+
   const handleMarkerClick = useCallback(
     (shop: Shop) => {
-      onSelectShop(selectedShop?.id === shop.id ? null : shop);
+      onSelectShop(selectedShopId === shop.id ? null : shop);
     },
-    [selectedShop, onSelectShop]
+    [selectedShopId, onSelectShop]
   );
 
   if (!mounted) {

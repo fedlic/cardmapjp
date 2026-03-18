@@ -1,3 +1,5 @@
+import { cache } from 'react';
+import type { Metadata } from 'next';
 import { createServerClient } from '@/lib/supabase/server';
 import HeroSection from '@/components/ShopDetail/HeroSection';
 import AISummary from '@/components/ShopDetail/AISummary';
@@ -6,16 +8,59 @@ import InfoSection from '@/components/ShopDetail/InfoSection';
 import ReviewList from '@/components/ShopDetail/ReviewList';
 import type { Shop, ShopRow, ShopInventory, Review } from '@/types';
 
+export const revalidate = 1800; // 30 min ISR cache
+
 interface PageProps {
   params: Promise<{ id: string }>;
+}
+
+const getShop = cache(async (id: string) => {
+  const supabase = createServerClient();
+  const { data, error } = await supabase
+    .from('shops_with_coords')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (error || !data) return null;
+  return data as ShopRow;
+});
+
+export async function generateStaticParams() {
+  const supabase = createServerClient();
+  const { data } = await supabase
+    .from('shops_with_coords')
+    .select('id')
+    .eq('is_active', true);
+  return (data ?? []).map((row) => ({ id: row.id }));
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const row = await getShop(id);
+  if (!row) return { title: 'Shop Not Found' };
+
+  const title = `${row.name_en} — CardMapJP`;
+  const description = row.ai_summary
+    ? row.ai_summary.slice(0, 160)
+    : `Find Pokémon cards at ${row.name_en} (${row.name_jp}) in Japan. Directions, hours, inventory & reviews.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+    },
+  };
 }
 
 export default async function ShopDetailPage({ params }: PageProps) {
   const { id } = await params;
   const supabase = createServerClient();
 
-  const [shopResult, inventoryResult, reviewsResult] = await Promise.all([
-    supabase.from('shops_with_coords').select('*').eq('id', id).single(),
+  const [row, inventoryResult, reviewsResult] = await Promise.all([
+    getShop(id),
     supabase
       .from('shop_inventory')
       .select('*')
@@ -28,7 +73,7 @@ export default async function ShopDetailPage({ params }: PageProps) {
       .order('created_at', { ascending: false }),
   ]);
 
-  if (shopResult.error || !shopResult.data) {
+  if (!row) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
@@ -41,7 +86,6 @@ export default async function ShopDetailPage({ params }: PageProps) {
     );
   }
 
-  const row = shopResult.data as ShopRow;
   const shop: Shop = { ...row, location: { lat: row.lat, lng: row.lng } };
   const inventory = (inventoryResult.data as ShopInventory[]) || [];
   const reviews = (reviewsResult.data as Review[]) || [];

@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 
+const SHOP_LIST_COLUMNS = [
+  'id', 'name_jp', 'name_en', 'region_id',
+  'address_en', 'lat', 'lng',
+  'english_staff', 'beginner_friendly',
+  'sells_singles', 'sells_booster_box', 'sells_psa_graded',
+  'sells_oripa', 'sells_english_cards', 'sells_vintage',
+  'google_rating', 'google_review_count',
+  'is_active',
+].join(',');
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const region_id = searchParams.get('region_id');
@@ -19,12 +29,14 @@ export async function GET(request: NextRequest) {
         p_radius: radius,
       });
       if (error) throw error;
-      return NextResponse.json(data);
+      return NextResponse.json(data, {
+        headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60' },
+      });
     }
 
     let query = supabase
       .from('shops_with_coords')
-      .select('*, shop_inventory(*)')
+      .select(SHOP_LIST_COLUMNS)
       .eq('is_active', true);
 
     if (region_id) {
@@ -34,7 +46,9 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query.order('name_en');
     if (error) throw error;
 
-    return NextResponse.json(data);
+    return NextResponse.json(data, {
+      headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60' },
+    });
   } catch (error) {
     console.error('Error fetching shops:', error);
     return NextResponse.json(

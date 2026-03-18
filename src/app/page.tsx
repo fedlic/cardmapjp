@@ -1,11 +1,18 @@
-'use client';
-
-import { useEffect, useState, useCallback } from 'react';
-import dynamic from 'next/dynamic';
-
-const ShopMap = dynamic(() => import('@/components/ShopMap'), { ssr: false });
-import ShopSidebar from '@/components/ShopSidebar';
+import { createServerClient } from '@/lib/supabase/server';
+import HomePageClient from '@/components/HomePageClient';
 import type { Shop, ShopRow } from '@/types';
+
+export const revalidate = 300; // 5 min ISR cache
+
+const SHOP_LIST_COLUMNS = [
+  'id', 'name_jp', 'name_en', 'region_id',
+  'address_en', 'lat', 'lng',
+  'english_staff', 'beginner_friendly',
+  'sells_singles', 'sells_booster_box', 'sells_psa_graded',
+  'sells_oripa', 'sells_english_cards', 'sells_vintage',
+  'google_rating', 'google_review_count',
+  'is_active',
+].join(',');
 
 function rowToShop(row: ShopRow): Shop {
   return {
@@ -14,74 +21,27 @@ function rowToShop(row: ShopRow): Shop {
   };
 }
 
-export default function HomePage() {
-  const [shops, setShops] = useState<Shop[]>([]);
-  const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default async function HomePage() {
+  const supabase = createServerClient();
 
-  useEffect(() => {
-    async function fetchShops() {
-      try {
-        const res = await fetch('/api/shops');
-        if (!res.ok) throw new Error('Failed to fetch shops');
-        const data: ShopRow[] = await res.json();
-        setShops(data.map(rowToShop));
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Something went wrong');
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchShops();
-  }, []);
-
-  const handleSelectShop = useCallback((shop: Shop | null) => {
-    setSelectedShop(shop);
-  }, []);
+  const { data, error } = await supabase
+    .from('shops_with_coords')
+    .select(SHOP_LIST_COLUMNS)
+    .eq('is_active', true)
+    .order('name_en');
 
   if (error) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-52px)]">
         <div className="text-center">
           <p className="text-lg font-semibold text-red-600">Error</p>
-          <p className="text-sm text-muted-foreground">{error}</p>
+          <p className="text-sm text-muted-foreground">Failed to load shops</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="h-[calc(100vh-52px)] flex flex-col md:flex-row">
-      {/* Map */}
-      <div className="h-1/2 md:h-full md:flex-1 relative">
-        {loading ? (
-          <div className="flex items-center justify-center h-full bg-gray-100">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#E3350D] mx-auto" />
-              <p className="text-sm text-muted-foreground mt-2">
-                Loading map...
-              </p>
-            </div>
-          </div>
-        ) : (
-          <ShopMap
-            shops={shops}
-            selectedShop={selectedShop}
-            onSelectShop={handleSelectShop}
-            className="w-full h-full"
-          />
-        )}
-      </div>
+  const shops = (data as unknown as ShopRow[]).map(rowToShop);
 
-      {/* Sidebar */}
-      <div className="h-1/2 md:h-full md:w-[380px] border-t md:border-t-0 md:border-l overflow-hidden">
-        <ShopSidebar
-          shops={shops}
-          selectedShopId={selectedShop?.id ?? null}
-          onSelectShop={(shop) => setSelectedShop(shop)}
-        />
-      </div>
-    </div>
-  );
+  return <HomePageClient shops={shops} />;
 }

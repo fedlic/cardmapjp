@@ -1,10 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import ShopCard from './ShopCard';
 import ShopFilters, { type Filters } from './ShopFilters';
+import { useDebounce } from '@/hooks/useDebounce';
 import type { Shop } from '@/types';
+
+type SortKey = 'name' | 'rating';
 
 interface ShopSidebarProps {
   shops: Shop[];
@@ -28,11 +31,18 @@ export default function ShopSidebar({
 }: ShopSidebarProps) {
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<Filters>(emptyFilters);
+  const [sortKey, setSortKey] = useState<SortKey>('name');
+  const debouncedSearch = useDebounce(search, 200);
+
+  const handleSelectShop = useCallback(
+    (shop: Shop) => onSelectShop(shop),
+    [onSelectShop]
+  );
 
   const filtered = useMemo(() => {
-    return shops.filter((shop) => {
-      if (search) {
-        const q = search.toLowerCase();
+    const list = shops.filter((shop) => {
+      if (debouncedSearch) {
+        const q = debouncedSearch.toLowerCase();
         if (
           !shop.name_en.toLowerCase().includes(q) &&
           !shop.name_jp.includes(q)
@@ -47,17 +57,35 @@ export default function ShopSidebar({
       if (filters.vintage && !shop.sells_vintage) return false;
       return true;
     });
-  }, [shops, search, filters]);
+
+    if (sortKey === 'rating') {
+      list.sort((a, b) => (b.google_rating ?? 0) - (a.google_rating ?? 0));
+    } else {
+      list.sort((a, b) => a.name_en.localeCompare(b.name_en));
+    }
+
+    return list;
+  }, [shops, debouncedSearch, filters, sortKey]);
 
   return (
     <div className="flex flex-col h-full bg-white">
       <div className="p-3 border-b">
-        <h2 className="font-bold text-lg mb-2">
-          Card Shops
-          <span className="text-sm font-normal text-muted-foreground ml-2">
-            {filtered.length} shops
-          </span>
-        </h2>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="font-bold text-lg">
+            Card Shops
+            <span className="text-sm font-normal text-muted-foreground ml-2">
+              {filtered.length} shops
+            </span>
+          </h2>
+          <select
+            value={sortKey}
+            onChange={(e) => setSortKey(e.target.value as SortKey)}
+            className="text-xs border rounded px-2 py-1 bg-white"
+          >
+            <option value="name">Name</option>
+            <option value="rating">Rating</option>
+          </select>
+        </div>
         <Input
           placeholder="Search shops..."
           value={search}
@@ -79,7 +107,7 @@ export default function ShopSidebar({
               key={shop.id}
               shop={shop}
               selected={shop.id === selectedShopId}
-              onClick={() => onSelectShop(shop)}
+              onSelect={handleSelectShop}
             />
           ))
         )}

@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getDirectionsUrl } from '@/lib/google-maps';
-import type { Shop } from '@/types';
+import type { Shop, OpenHours } from '@/types';
 
 interface InfoSectionProps {
   shop: Shop;
@@ -14,6 +14,34 @@ const PAYMENT_LABELS: Record<string, string> = {
   mastercard: 'Mastercard',
   ic: 'IC Card (Suica/Pasmo)',
 };
+
+const DAY_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+const DAY_LABELS: Record<string, string> = {
+  monday: 'Mon', tuesday: 'Tue', wednesday: 'Wed', thursday: 'Thu',
+  friday: 'Fri', saturday: 'Sat', sunday: 'Sun',
+};
+
+function OpenHoursDisplay({ hours }: { hours: OpenHours }) {
+  const entries = DAY_ORDER.filter((d) => d in hours);
+  if (entries.length === 0) return null;
+
+  return (
+    <div>
+      <h3 className="text-sm font-medium text-muted-foreground">Hours</h3>
+      <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 mt-1 text-sm">
+        {entries.map((day) => {
+          const slot = hours[day];
+          return (
+            <div key={day} className="contents">
+              <span className="font-medium">{DAY_LABELS[day] ?? day}</span>
+              <span>{slot ? `${slot.open} – ${slot.close}` : 'Closed'}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function InfoSection({ shop }: InfoSectionProps) {
   const directionsUrl = getDirectionsUrl(
@@ -43,6 +71,9 @@ export default function InfoSection({ shop }: InfoSectionProps) {
               </p>
             )}
           </div>
+
+          {/* Hours */}
+          {shop.open_hours && <OpenHoursDisplay hours={shop.open_hours} />}
 
           {/* Payment */}
           <div>
