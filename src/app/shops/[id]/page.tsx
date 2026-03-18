@@ -1,6 +1,6 @@
 import { cache } from 'react';
 import type { Metadata } from 'next';
-import { createServerClient } from '@/lib/supabase/server';
+import { createServerClient, createAuthServerClient } from '@/lib/supabase/server';
 import HeroSection from '@/components/ShopDetail/HeroSection';
 import AISummary from '@/components/ShopDetail/AISummary';
 import InventoryGrid from '@/components/ShopDetail/InventoryGrid';
@@ -129,8 +129,9 @@ function buildJsonLd(shop: Shop) {
 export default async function ShopDetailPage({ params }: PageProps) {
   const { id } = await params;
   const supabase = createServerClient();
+  const authSupabase = await createAuthServerClient();
 
-  const [row, inventoryResult, reviewsResult] = await Promise.all([
+  const [row, inventoryResult, reviewsResult, { data: { user } }] = await Promise.all([
     getShop(id),
     supabase
       .from('shop_inventory')
@@ -142,6 +143,7 @@ export default async function ShopDetailPage({ params }: PageProps) {
       .select('*')
       .eq('shop_id', id)
       .order('created_at', { ascending: false }),
+    authSupabase.auth.getUser(),
   ]);
 
   if (!row) {
@@ -181,7 +183,7 @@ export default async function ShopDetailPage({ params }: PageProps) {
         <AISummary summary={shop.ai_summary} tips={shop.visitor_tips} />
         <InventoryGrid inventory={inventory} />
         <InfoSection shop={shop} />
-        <ReviewList reviews={reviews} />
+        <ReviewList reviews={reviews} shopId={id} userId={user?.id ?? null} />
       </div>
     </>
   );

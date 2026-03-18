@@ -1,4 +1,4 @@
-import { supabase } from '../client';
+import { createServerClient } from '../server';
 import type { Shop, ShopRow } from '@/types';
 
 function rowToShop(row: ShopRow): Shop {
@@ -14,6 +14,8 @@ export async function getShops(params?: {
   lng?: number;
   radius_km?: number;
 }) {
+  const supabase = createServerClient();
+
   // Use RPC for distance-based queries with PostGIS
   if (params?.lat && params?.lng) {
     const radius = (params.radius_km || 2) * 1000; // convert to meters
@@ -42,6 +44,7 @@ export async function getShops(params?: {
 }
 
 export async function getShopById(id: string): Promise<Shop | null> {
+  const supabase = createServerClient();
   const { data, error } = await supabase
     .from('shops_with_coords')
     .select('*')

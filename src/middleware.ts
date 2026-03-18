@@ -1,40 +1,56 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 
-const PUBLIC_PATHS = ['/admin/login', '/api/admin/login'];
+const ADMIN_PUBLIC_PATHS = ['/admin/login', '/api/admin/login'];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Only protect /admin and /api/admin routes
-  if (!pathname.startsWith('/admin') && !pathname.startsWith('/api/admin')) {
-    return NextResponse.next();
-  }
+  // --- Supabase session refresh (all routes) ---
+  let response = NextResponse.next({ request });
 
-  // Allow public auth routes
-  if (PUBLIC_PATHS.some((p) => pathname === p)) {
-    return NextResponse.next();
-  }
-
-  const session = request.cookies.get('admin_session')?.value;
-  if (!session) {
-    if (pathname.startsWith('/api/admin')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          );
+          response = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
     }
-    return NextResponse.redirect(new URL('/admin/login', request.url));
-  }
+  );
 
-  // Validate HMAC signature: "timestamp.signature"
-  const parts = session.split('.');
-  if (parts.length !== 2) {
-    if (pathname.startsWith('/api/admin')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  // Refresh the session JWT (important for keeping auth alive)
+  await supabase.auth.getUser();
+
+  // --- Admin HMAC protection (existing logic) ---
+  if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
+    if (!ADMIN_PUBLIC_PATHS.some((p) => pathname === p)) {
+      const session = request.cookies.get('admin_session')?.value;
+      if (!session || session.split('.').length !== 2) {
+        if (pathname.startsWith('/api/admin')) {
+          return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        return NextResponse.redirect(new URL('/admin/login', request.url));
+      }
     }
-    return NextResponse.redirect(new URL('/admin/login', request.url));
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 };
