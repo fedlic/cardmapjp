@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   title: "CardMapJP — Pokemon Card Shop Finder in Japan",
   description:
     "Find the best Pokemon card shops in Akihabara and across Japan. Real-time inventory, English support info, and visitor tips for foreign collectors.",
+  verification: {
+    google: "DcP8asRDyzENMw-VEHqueaMAq_K4X6YyzgeIdGQF0QA",
+  },
 };
 
 export default function RootLayout({
