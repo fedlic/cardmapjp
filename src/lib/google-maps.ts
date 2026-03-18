@@ -1,5 +1,3 @@
-export const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!;
-
 export const DEFAULT_CENTER = { lat: 35.6984, lng: 139.7731 }; // Akihabara
 export const DEFAULT_ZOOM = 15;
 
