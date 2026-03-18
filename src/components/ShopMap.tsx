@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { DEFAULT_CENTER, DEFAULT_ZOOM } from '@/lib/google-maps';
 import type { Shop } from '@/types';
+import type { GeoPosition } from '@/hooks/useGeolocation';
 
 import {
   MapContainer,
@@ -14,7 +15,6 @@ import {
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Custom red marker icon
 const defaultIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
@@ -33,10 +33,20 @@ const selectedIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
+const userIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
 interface ShopMapProps {
   shops: Shop[];
   selectedShop: Shop | null;
   onSelectShop: (shop: Shop | null) => void;
+  userLocation?: GeoPosition | null;
   className?: string;
 }
 
@@ -50,10 +60,23 @@ function FlyToSelected({ shop }: { shop: Shop | null }) {
   return null;
 }
 
+function FlyToUser({ position }: { position: GeoPosition | null }) {
+  const map = useMap();
+  const hasFlown = useRef(false);
+  useEffect(() => {
+    if (position && !hasFlown.current) {
+      map.flyTo([position.lat, position.lng], 15, { duration: 0.8 });
+      hasFlown.current = true;
+    }
+  }, [position, map]);
+  return null;
+}
+
 export default function ShopMap({
   shops,
   selectedShop,
   onSelectShop,
+  userLocation,
   className,
 }: ShopMapProps) {
   const [mounted, setMounted] = useState(false);
@@ -92,6 +115,14 @@ export default function ShopMap({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <FlyToSelected shop={selectedShop} />
+      <FlyToUser position={userLocation ?? null} />
+      {userLocation && (
+        <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
+          <Popup>
+            <p className="font-semibold text-sm">You are here</p>
+          </Popup>
+        </Marker>
+      )}
       {shops.map((shop) => {
         const isSelected = selectedShop?.id === shop.id;
         return (
@@ -109,7 +140,7 @@ export default function ShopMap({
                 <p className="text-xs text-gray-500">{shop.name_jp}</p>
                 {shop.google_rating && (
                   <p className="text-xs mt-1">
-                    <span className="text-yellow-500">★</span> {shop.google_rating}
+                    <span className="text-yellow-500">&#9733;</span> {shop.google_rating}
                     <span className="text-gray-400 ml-1">
                       ({shop.google_review_count})
                     </span>
@@ -119,7 +150,7 @@ export default function ShopMap({
                   href={`/shops/${shop.id}`}
                   className="text-xs text-[#E3350D] hover:underline mt-2 inline-block font-medium"
                 >
-                  View Details →
+                  View Details &rarr;
                 </a>
               </div>
             </Popup>

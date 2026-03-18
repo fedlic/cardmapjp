@@ -1,15 +1,23 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
-const REGIONS = [
-  { name: 'Akihabara', city: 'Tokyo', status: 'live' as const, shops: 78, href: '/regions/akihabara' },
-  { name: 'Nipponbashi', city: 'Osaka', status: 'live' as const, shops: 20 },
-  { name: 'Osu', city: 'Nagoya', status: 'live' as const, shops: 15 },
-  { name: 'Tenjin / Hakata', city: 'Fukuoka', status: 'live' as const, shops: 15 },
-  { name: 'Shibuya', city: 'Tokyo', status: 'coming' as const },
-  { name: 'Shinjuku', city: 'Tokyo', status: 'coming' as const },
-  { name: 'Ikebukuro', city: 'Tokyo', status: 'coming' as const },
-  { name: 'Teramachi', city: 'Kyoto', status: 'coming' as const },
+interface RegionItem {
+  name: string;
+  city: string;
+  status: 'live' | 'coming';
+  shops?: number;
+  href?: string;
+}
+
+const REGIONS: RegionItem[] = [
+  { name: 'Akihabara', city: 'Tokyo', status: 'live', shops: 78, href: '/regions/akihabara' },
+  { name: 'Nipponbashi', city: 'Osaka', status: 'live', shops: 20, href: '/regions/nipponbashi' },
+  { name: 'Osu', city: 'Nagoya', status: 'live', shops: 15, href: '/regions/osu' },
+  { name: 'Tenjin / Hakata', city: 'Fukuoka', status: 'live', shops: 15, href: '/regions/tenjin-hakata' },
+  { name: 'Shibuya', city: 'Tokyo', status: 'coming' },
+  { name: 'Shinjuku', city: 'Tokyo', status: 'coming' },
+  { name: 'Ikebukuro', city: 'Tokyo', status: 'coming' },
+  { name: 'Teramachi', city: 'Kyoto', status: 'coming' },
 ];
 
 export default function RegionsPage() {
@@ -44,9 +52,9 @@ export default function RegionsPage() {
                   <Badge variant="outline">Coming Soon</Badge>
                 )}
               </div>
-              {region.status === 'live' && (
+              {region.status === 'live' && region.href && (
                 <a
-                  href={(region as { href?: string }).href ?? '/'}
+                  href={region.href}
                   className="text-sm text-[#E3350D] hover:underline mt-3 inline-block"
                 >
                   Explore →

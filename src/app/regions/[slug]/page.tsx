@@ -1,23 +1,37 @@
+import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createServerClient } from '@/lib/supabase/server';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { ALL_REGION_SLUGS, getRegionConfig } from '@/lib/regions';
 import type { ShopRow } from '@/types';
 
-export const revalidate = 3600; // 1 hour
+export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: 'Best Pokemon Card Shops in Akihabara, Tokyo (2025 Guide) | CardMapJP',
-  description:
-    'Complete guide to 78+ Pokemon card shops in Akihabara, Tokyo. Find booster boxes, rare singles, PSA graded cards, vintage packs & English cards. Maps, hours, prices and tips for foreign visitors.',
-  openGraph: {
-    title: 'Best Pokemon Card Shops in Akihabara, Tokyo | CardMapJP',
-    description:
-      '78+ Pokemon card shops in Akihabara. Booster boxes, rare singles, graded cards & more. English-friendly guide for collectors.',
-    type: 'website',
-    url: 'https://cardmapjp.vercel.app/regions/akihabara',
-  },
-};
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
+
+export function generateStaticParams() {
+  return ALL_REGION_SLUGS.map((slug) => ({ slug }));
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const config = getRegionConfig(slug);
+  if (!config) return { title: 'Region Not Found' };
+
+  return {
+    title: config.meta_title,
+    description: config.meta_description,
+    openGraph: {
+      title: config.meta_title.replace(' | CardMapJP', ''),
+      description: config.og_description,
+      type: 'website',
+      url: `https://cardmapjp.vercel.app/regions/${slug}`,
+    },
+  };
+}
 
 const SHOP_COLUMNS = [
   'id', 'name_en', 'name_jp', 'address_en',
@@ -28,11 +42,16 @@ const SHOP_COLUMNS = [
   'open_hours', 'ai_summary',
 ].join(',');
 
-export default async function AkihabaraPage() {
+export default async function RegionPage({ params }: PageProps) {
+  const { slug } = await params;
+  const config = getRegionConfig(slug);
+  if (!config) notFound();
+
   const supabase = createServerClient();
   const { data } = await supabase
     .from('shops_with_coords')
     .select(SHOP_COLUMNS)
+    .eq('region_id', config.region_id)
     .eq('is_active', true)
     .order('google_rating', { ascending: false, nullsFirst: false });
 
@@ -43,7 +62,7 @@ export default async function AkihabaraPage() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: 'Best Pokemon Card Shops in Akihabara',
+    name: `Best Pokemon Card Shops in ${config.name_en}`,
     numberOfItems: shops.length,
     itemListElement: shops.slice(0, 10).map((shop, i) => ({
       '@type': 'ListItem',
@@ -67,10 +86,10 @@ export default async function AkihabaraPage() {
         {/* Hero */}
         <div className="bg-gradient-to-r from-[#E3350D] to-[#c42d0b] text-white p-8 rounded-xl mb-8">
           <h1 className="text-3xl font-bold">
-            Best Pokemon Card Shops in Akihabara
+            Best Pokemon Card Shops in {config.name_en}
           </h1>
           <p className="text-white/80 mt-2 text-lg">
-            The ultimate guide for foreign collectors visiting Tokyo&apos;s card paradise
+            {config.hero_subtitle}
           </p>
           <div className="flex flex-wrap gap-3 mt-4 text-sm">
             <span className="bg-white/20 rounded-full px-3 py-1">
@@ -91,72 +110,35 @@ export default async function AkihabaraPage() {
           </a>
         </div>
 
-        {/* Quick intro */}
+        {/* Article content */}
         <article className="prose prose-sm max-w-none mb-8">
-          <h2 className="text-xl font-bold">Why Akihabara for Pokemon Cards?</h2>
-          <p>
-            Akihabara (秋葉原) in central Tokyo is the world&apos;s largest concentration of Pokemon
-            card shops. Within a 10-minute walk from Akihabara Station, you&apos;ll find over {shops.length} shops
-            selling everything from the latest booster boxes to vintage Base Set holos and
-            PSA-graded slabs. Most shops are located along Chuo-dori and in the side streets
-            between the station and Suehirocho.
-          </p>
-          <p>
-            Whether you&apos;re hunting for Japanese-exclusive art rares, sealed vintage product,
-            or graded investment pieces, Akihabara has it all &mdash; often at prices significantly
-            below international market value.
-          </p>
+          <h2 className="text-xl font-bold">
+            Why {config.name_en} for Pokemon Cards?
+          </h2>
+          {config.why_paragraphs.map((p, i) => (
+            <p key={i}>{p}</p>
+          ))}
 
-          <h2 className="text-xl font-bold mt-6">Getting to Akihabara</h2>
+          <h2 className="text-xl font-bold mt-6">
+            Getting to {config.name_en}
+          </h2>
           <ul>
-            <li>
-              <strong>JR Yamanote Line</strong> &mdash; Akihabara Station (Electric Town exit).
-              The main loop line connecting Shibuya, Shinjuku, Ikebukuro, and Tokyo Station.
-            </li>
-            <li>
-              <strong>Tokyo Metro Hibiya Line</strong> &mdash; Akihabara Station.
-              Direct from Roppongi and Ginza.
-            </li>
-            <li>
-              <strong>TX Tsukuba Express</strong> &mdash; Akihabara Station.
-              From Tsukuba and northern suburbs.
-            </li>
-            <li>
-              <strong>From Narita Airport</strong> &mdash; Take the JR Narita Express to Tokyo Station,
-              then transfer to JR Yamanote Line (2 stops). About 80 minutes total.
-            </li>
-            <li>
-              <strong>From Haneda Airport</strong> &mdash; Take the Keikyu Line to Shinagawa,
-              then transfer to JR Yamanote Line. About 40 minutes total.
-            </li>
+            {config.getting_there.map((t) => (
+              <li key={t.line}>
+                <strong>{t.line}</strong>
+                {t.station ? ` — ${t.station}. ` : ' — '}
+                {t.detail}
+              </li>
+            ))}
           </ul>
 
           <h2 className="text-xl font-bold mt-6">Tips for Foreign Visitors</h2>
           <ul>
-            <li>
-              <strong>Tax-free shopping</strong> &mdash; Most larger shops offer tax-free
-              purchases for tourists (passport required, minimum spend usually 5,000 yen).
-            </li>
-            <li>
-              <strong>Payment</strong> &mdash; Cash is still king at smaller shops. Larger
-              stores accept credit cards and IC cards (Suica/Pasmo).
-            </li>
-            <li>
-              <strong>Best time to visit</strong> &mdash; Weekday mornings (11am-1pm) are
-              quietest. Weekends and holidays are very crowded, especially at popular shops.
-            </li>
-            <li>
-              <strong>English support</strong> &mdash; {englishShops.length} shops have English-speaking
-              staff. Look for the &quot;English OK&quot; badge in our listings below.
-            </li>
-            <li>
-              <strong>Condition grading</strong> &mdash; Japanese shops grade condition strictly.
-              &quot;Near Mint&quot; in Japan is often better than NM in Western markets.
-            </li>
-            <li>
-              <strong>Prices</strong> &mdash; Cards are priced individually in display cases.
-              Prices are final &mdash; haggling is not common in Japanese card shops.
-            </li>
+            {config.tips.map((tip) => (
+              <li key={tip.title}>
+                <strong>{tip.title}</strong> — {tip.body}
+              </li>
+            ))}
           </ul>
 
           <h2 className="text-xl font-bold mt-6">What You Can Find</h2>
@@ -179,7 +161,7 @@ export default async function AkihabaraPage() {
 
         {/* Shop listing */}
         <h2 className="text-xl font-bold mb-4">
-          All {shops.length} Pokemon Card Shops in Akihabara
+          All {shops.length} Pokemon Card Shops in {config.name_en}
         </h2>
 
         <div className="space-y-3">
@@ -203,7 +185,7 @@ export default async function AkihabaraPage() {
                     </div>
                     {shop.google_rating && (
                       <div className="flex items-center gap-1 shrink-0 text-sm">
-                        <span className="text-yellow-500">★</span>
+                        <span className="text-yellow-500">&#9733;</span>
                         <span className="font-medium">{shop.google_rating}</span>
                         {shop.google_review_count && (
                           <span className="text-xs text-muted-foreground">
