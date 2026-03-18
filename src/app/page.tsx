@@ -1,8 +1,22 @@
+import type { Metadata } from 'next';
 import { createServerClient } from '@/lib/supabase/server';
 import HomePageClient from '@/components/HomePageClient';
 import type { Shop, ShopRow } from '@/types';
 
 export const revalidate = 300; // 5 min ISR cache
+
+export const metadata: Metadata = {
+  title: 'Pokemon Card Shops in Akihabara, Tokyo | CardMapJP',
+  description:
+    'Find the best Pokemon card shops in Akihabara, Tokyo. Interactive map with 78+ shops, real-time inventory, English support info, directions, and visitor tips for foreign collectors.',
+  openGraph: {
+    title: 'Pokemon Card Shops in Akihabara, Tokyo | CardMapJP',
+    description:
+      'Interactive map of 78+ Pokemon card shops in Akihabara. Inventory, English staff info, hours & directions.',
+    type: 'website',
+    url: 'https://cardmapjp.vercel.app',
+  },
+};
 
 const SHOP_LIST_COLUMNS = [
   'id', 'name_jp', 'name_en', 'region_id',

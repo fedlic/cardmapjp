@@ -6,7 +6,7 @@ import AISummary from '@/components/ShopDetail/AISummary';
 import InventoryGrid from '@/components/ShopDetail/InventoryGrid';
 import InfoSection from '@/components/ShopDetail/InfoSection';
 import ReviewList from '@/components/ShopDetail/ReviewList';
-import type { Shop, ShopRow, ShopInventory, Review } from '@/types';
+import type { Shop, ShopRow, ShopInventory, Review, OpenHours } from '@/types';
 
 export const revalidate = 1800; // 30 min ISR cache
 
@@ -39,10 +39,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const row = await getShop(id);
   if (!row) return { title: 'Shop Not Found' };
 
-  const title = `${row.name_en} — CardMapJP`;
+  const title = `${row.name_en} | Pokemon Cards Akihabara | CardMapJP`;
+  const descParts: string[] = [];
+  if (row.open_hours) {
+    const mon = row.open_hours['monday'];
+    if (mon) descParts.push(`Open ${mon.open}–${mon.close}`);
+  }
+  if (row.english_staff) descParts.push('English staff available');
+  if (row.google_rating) descParts.push(`★${row.google_rating} rating`);
+  const descSuffix = descParts.length > 0 ? ` ${descParts.join('. ')}.` : '';
   const description = row.ai_summary
-    ? row.ai_summary.slice(0, 160)
-    : `Find Pokémon cards at ${row.name_en} (${row.name_jp}) in Japan. Directions, hours, inventory & reviews.`;
+    ? row.ai_summary.slice(0, 140) + descSuffix
+    : `Find Pokemon cards at ${row.name_en} (${row.name_jp}) in Akihabara, Tokyo.${descSuffix} Directions, hours, inventory & reviews.`;
 
   return {
     title,
@@ -51,8 +59,71 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title,
       description,
       type: 'website',
+      url: `https://cardmapjp.vercel.app/shops/${id}`,
     },
   };
+}
+
+const DAY_MAP: Record<string, string> = {
+  monday: 'Mo', tuesday: 'Tu', wednesday: 'We', thursday: 'Th',
+  friday: 'Fr', saturday: 'Sa', sunday: 'Su',
+};
+
+function formatOpeningHours(hours: OpenHours): string[] {
+  return Object.entries(hours)
+    .filter(([, slot]) => slot !== null)
+    .map(([day, slot]) => {
+      const abbr = DAY_MAP[day];
+      return abbr && slot ? `${abbr} ${slot.open}-${slot.close}` : null;
+    })
+    .filter((v): v is string => v !== null);
+}
+
+const PAYMENT_MAP: Record<string, string> = {
+  cash: 'Cash',
+  visa: 'Visa',
+  mastercard: 'MasterCard',
+  ic: 'IC Card',
+};
+
+function buildJsonLd(shop: Shop) {
+  const ld: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Store',
+    name: shop.name_en,
+    alternateName: shop.name_jp,
+    url: `https://cardmapjp.vercel.app/shops/${shop.id}`,
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: shop.location.lat,
+      longitude: shop.location.lng,
+    },
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: shop.address_en,
+      addressLocality: 'Tokyo',
+      addressCountry: 'JP',
+    },
+  };
+
+  if (shop.phone) ld.telephone = shop.phone;
+  if (shop.website_url) ld.sameAs = shop.website_url;
+  if (shop.open_hours) ld.openingHours = formatOpeningHours(shop.open_hours);
+  if (shop.payment_methods?.length) {
+    ld.paymentAccepted = shop.payment_methods
+      .map((m) => PAYMENT_MAP[m] || m)
+      .join(', ');
+  }
+  if (shop.google_rating) {
+    ld.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: shop.google_rating,
+      reviewCount: shop.google_review_count ?? 0,
+      bestRating: 5,
+    };
+  }
+
+  return ld;
 }
 
 export default async function ShopDetailPage({ params }: PageProps) {
@@ -90,20 +161,28 @@ export default async function ShopDetailPage({ params }: PageProps) {
   const inventory = (inventoryResult.data as ShopInventory[]) || [];
   const reviews = (reviewsResult.data as Review[]) || [];
 
-  return (
-    <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-      <a
-        href="/"
-        className="text-sm text-[#E3350D] hover:underline inline-block mb-2"
-      >
-        &larr; Back to map
-      </a>
+  const jsonLd = buildJsonLd(shop);
 
-      <HeroSection shop={shop} />
-      <AISummary summary={shop.ai_summary} tips={shop.visitor_tips} />
-      <InventoryGrid inventory={inventory} />
-      <InfoSection shop={shop} />
-      <ReviewList reviews={reviews} />
-    </div>
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+        <a
+          href="/"
+          className="text-sm text-[#E3350D] hover:underline inline-block mb-2"
+        >
+          &larr; Back to map
+        </a>
+
+        <HeroSection shop={shop} />
+        <AISummary summary={shop.ai_summary} tips={shop.visitor_tips} />
+        <InventoryGrid inventory={inventory} />
+        <InfoSection shop={shop} />
+        <ReviewList reviews={reviews} />
+      </div>
+    </>
   );
 }

@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 const REGIONS = [
-  { name: 'Akihabara', city: 'Tokyo', status: 'live' as const, shops: 10 },
+  { name: 'Akihabara', city: 'Tokyo', status: 'live' as const, shops: 78, href: '/regions/akihabara' },
   { name: 'Shibuya', city: 'Tokyo', status: 'coming' as const },
   { name: 'Shinjuku', city: 'Tokyo', status: 'coming' as const },
   { name: 'Ikebukuro', city: 'Tokyo', status: 'coming' as const },
@@ -46,7 +46,7 @@ export default function RegionsPage() {
               </div>
               {region.status === 'live' && (
                 <a
-                  href="/"
+                  href={(region as { href?: string }).href ?? '/'}
                   className="text-sm text-[#E3350D] hover:underline mt-3 inline-block"
                 >
                   Explore →
