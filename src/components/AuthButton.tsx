@@ -1,18 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
-interface AuthButtonProps {
-  user: User | null;
-}
+export default function AuthButton() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-export default function AuthButton({ user }: AuthButtonProps) {
-  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    const supabase = createClient();
+
+    // Get initial session
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+      setLoading(false);
+    });
+
+    // Listen for auth changes (login/logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleSignIn = async () => {
-    setLoading(true);
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -23,20 +36,22 @@ export default function AuthButton({ user }: AuthButtonProps) {
   };
 
   const handleSignOut = async () => {
-    setLoading(true);
     const supabase = createClient();
     await supabase.auth.signOut();
-    window.location.reload();
+    setUser(null);
   };
+
+  if (loading) {
+    return null;
+  }
 
   if (!user) {
     return (
       <button
         onClick={handleSignIn}
-        disabled={loading}
-        className="text-sm bg-white/20 hover:bg-white/30 rounded px-3 py-1 transition-colors disabled:opacity-50"
+        className="text-sm bg-white/20 hover:bg-white/30 rounded px-3 py-1 transition-colors"
       >
-        {loading ? 'Signing in...' : 'Sign In'}
+        Sign In
       </button>
     );
   }
@@ -57,10 +72,9 @@ export default function AuthButton({ user }: AuthButtonProps) {
       <span className="text-sm hidden sm:inline">{displayName}</span>
       <button
         onClick={handleSignOut}
-        disabled={loading}
-        className="text-xs bg-white/20 hover:bg-white/30 rounded px-2 py-1 transition-colors disabled:opacity-50"
+        className="text-xs bg-white/20 hover:bg-white/30 rounded px-2 py-1 transition-colors"
       >
-        {loading ? '...' : 'Sign Out'}
+        Sign Out
       </button>
     </div>
   );

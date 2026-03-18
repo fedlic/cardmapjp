@@ -1,16 +1,34 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { createClient } from '@/lib/supabase/client';
 import ReviewForm from './ReviewForm';
 import type { Review } from '@/types';
 
 interface ReviewListProps {
   reviews: Review[];
   shopId: string;
-  userId: string | null;
 }
 
-export default function ReviewList({ reviews, shopId, userId }: ReviewListProps) {
+export default function ReviewList({ reviews, shopId }: ReviewListProps) {
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUserId(user?.id ?? null);
+    });
+  }, []);
+
+  const handleSignIn = () => {
+    const supabase = createClient();
+    supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=${window.location.pathname}` },
+    });
+  };
+
   return (
     <div>
       <h2 className="font-semibold text-lg mb-3">
@@ -25,14 +43,7 @@ export default function ReviewList({ reviews, shopId, userId }: ReviewListProps)
         <p className="text-sm text-muted-foreground mb-4">
           <a href="#" className="text-[#E3350D] hover:underline" onClick={(e) => {
             e.preventDefault();
-            // Trigger sign-in from client
-            import('@/lib/supabase/client').then(({ createClient }) => {
-              const supabase = createClient();
-              supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: { redirectTo: `${window.location.origin}/auth/callback?next=${window.location.pathname}` },
-              });
-            });
+            handleSignIn();
           }}>
             Sign in with Google
           </a>

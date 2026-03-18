@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { createAuthServerClient } from "@/lib/supabase/server";
 import AuthButton from "@/components/AuthButton";
 import "./globals.css";
 
@@ -23,14 +22,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = await createAuthServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
   return (
     <html lang="en">
       <body
@@ -50,7 +46,7 @@ export default async function RootLayout({
             <a href="/regions" className="hover:underline">
               Regions
             </a>
-            <AuthButton user={user} />
+            <AuthButton />
           </nav>
         </header>
         <main className="flex-1">{children}</main>
