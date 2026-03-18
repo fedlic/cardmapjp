@@ -51,11 +51,33 @@ Find the best Pokemon card shops in Akihabara and across Japan with real-time in
 - Akihabara (Live - 78 shops)
 - Coming soon: Shibuya, Shinjuku, Ikebukuro, Nipponbashi (Osaka), Osu (Nagoya), Teramachi (Kyoto), Tenjin (Fukuoka)
 
+### SEO
+- Dynamic `sitemap.xml` with all shop and region pages
+- `robots.txt` blocking `/api/` routes
+- JSON-LD structured data (Schema.org `Store`) on each shop detail page
+- OpenGraph meta tags on all pages
+- `/regions/akihabara` landing page with SEO article content
+
+### Admin Dashboard (`/admin`)
+Password-protected management panel.
+
+| Page | Features |
+|------|----------|
+| `/admin/login` | Password authentication (env var `ADMIN_PASSWORD`) |
+| `/admin` | Stats: total/active shops, avg rating, inventory summary, recently updated |
+| `/admin/shops` | Shop CRUD: table with search, create/edit dialog (name, address, coords, features, hours), delete |
+| `/admin/inventory` | Shop selector → 13-category grid, availability/price/notes editing, bulk save |
+
+**Auth**: HMAC-SHA256 signed cookie, middleware-protected, 24h session.
+
 ### API
-- `GET /api/shops` - List all shops with inventory
+- `GET /api/shops` - List all shops (optimized columns, Cache-Control headers)
   - Query params: `region_id`, `lat`, `lng`, `radius_km`
   - PostGIS-powered radius search
 - `POST /api/shops/[id]/generate-summary` - Generate AI summary via Claude API
+- `GET/POST /api/admin/shops` - Admin shop CRUD
+- `PUT/DELETE /api/admin/shops/[id]` - Admin shop update/delete
+- `GET/PUT /api/admin/inventory` - Admin inventory management
 
 ---
 
@@ -79,29 +101,46 @@ Find the best Pokemon card shops in Akihabara and across Japan with real-time in
 ```
 cardmapjp/
 ├── src/
+│   ├── middleware.ts                    # Auth middleware for /admin/*
 │   ├── app/
-│   │   ├── page.tsx                    # Home (map + sidebar)
+│   │   ├── page.tsx                    # Home (Server Component, 5min ISR)
 │   │   ├── layout.tsx                  # Root layout with header
-│   │   ├── shops/[id]/page.tsx         # Shop detail page
-│   │   ├── regions/page.tsx            # Region selection
+│   │   ├── sitemap.ts                  # Dynamic sitemap.xml
+│   │   ├── robots.ts                   # robots.txt
+│   │   ├── shops/[id]/page.tsx         # Shop detail (SSG, JSON-LD, SEO)
+│   │   ├── regions/
+│   │   │   ├── page.tsx               # Region selection
+│   │   │   └── akihabara/page.tsx     # Akihabara landing page (SEO)
+│   │   ├── admin/
+│   │   │   ├── layout.tsx             # Admin layout (sidenav)
+│   │   │   ├── login/page.tsx         # Login form
+│   │   │   ├── page.tsx               # Dashboard (stats)
+│   │   │   ├── shops/page.tsx         # Shop CRUD
+│   │   │   └── inventory/page.tsx     # Inventory management
 │   │   └── api/
-│   │       └── shops/
-│   │           ├── route.ts            # GET /api/shops
-│   │           └── [id]/
-│   │               └── generate-summary/
-│   │                   └── route.ts    # POST AI summary
+│   │       ├── shops/route.ts         # GET /api/shops
+│   │       ├── shops/[id]/generate-summary/route.ts
+│   │       └── admin/
+│   │           ├── login/route.ts     # POST login
+│   │           ├── logout/route.ts    # POST logout
+│   │           ├── shops/route.ts     # GET/POST shops
+│   │           ├── shops/[id]/route.ts # PUT/DELETE shop
+│   │           └── inventory/route.ts # GET/PUT inventory
 │   ├── components/
+│   │   ├── HomePageClient.tsx          # Client-side map + sidebar
 │   │   ├── ShopMap.tsx                 # Leaflet map with markers
-│   │   ├── ShopSidebar.tsx             # Search + filter + list
-│   │   ├── ShopCard.tsx                # Shop card in sidebar
+│   │   ├── ShopSidebar.tsx             # Search + filter + sort + list
+│   │   ├── ShopCard.tsx                # Shop card (React.memo)
 │   │   ├── ShopFilters.tsx             # Filter badge buttons
 │   │   ├── ShopDetail/
 │   │   │   ├── HeroSection.tsx         # Shop name, ratings, badges
 │   │   │   ├── AISummary.tsx           # AI summary + visitor tips
 │   │   │   ├── InventoryGrid.tsx       # Product categories grid
-│   │   │   ├── InfoSection.tsx         # Address, payment, links
+│   │   │   ├── InfoSection.tsx         # Address, payment, hours, links
 │   │   │   └── ReviewList.tsx          # User reviews
-│   │   └── ui/                         # shadcn/ui components
+│   │   └── ui/                         # Base UI components
+│   ├── hooks/
+│   │   └── useDebounce.ts             # Debounce hook (200ms)
 │   ├── lib/
 │   │   ├── claude.ts                   # Claude API integration
 │   │   ├── google-maps.ts             # Map config constants
@@ -164,7 +203,8 @@ npm install
 
 # Environment variables
 cp .env.local.example .env.local
-# Fill in your Supabase URL, anon key, and service role key
+# Fill in your Supabase URL, anon key, service role key, and admin password
+# ADMIN_PASSWORD=your-admin-password
 
 # Run migrations (requires Supabase CLI)
 npx supabase db query -f supabase/migrations/001_initial.sql --linked
@@ -193,14 +233,14 @@ Open [http://localhost:3000](http://localhost:3000)
 - [ ] "Near me" GPS-based shop discovery
 - [ ] Shop comparison tool (compare inventory/prices side-by-side)
 - [ ] Bookmark / favorites system (localStorage or auth-based)
-- [ ] Sort shops by distance, rating, or inventory richness
+- [x] Sort shops by distance, rating, or inventory richness
 
 ### Phase 3 - Community & Content
 - [ ] User authentication (Google / X login via Supabase Auth)
 - [ ] User review submission with photo uploads
 - [ ] "I visited" check-in system with badges
 - [ ] Community-contributed inventory updates (crowd-sourced stock info)
-- [ ] Shop owner claim & management portal
+- [x] Shop owner claim & management portal (admin dashboard)
 
 ### Phase 4 - Multi-Region Expansion
 - [ ] Nipponbashi (Osaka) - Den Den Town card shops
@@ -230,7 +270,7 @@ Open [http://localhost:3000](http://localhost:3000)
 ### Infrastructure & Quality
 - [ ] Automated shop data verification (web scraping + AI validation)
 - [ ] Performance monitoring and error tracking
-- [ ] SEO optimization (meta tags, structured data, sitemap)
+- [x] SEO optimization (meta tags, structured data, sitemap)
 - [ ] Accessibility audit (WCAG 2.1 AA compliance)
 - [ ] E2E tests with Playwright
 - [ ] CI/CD pipeline with GitHub Actions
