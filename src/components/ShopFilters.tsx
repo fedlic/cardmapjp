@@ -1,7 +1,7 @@
 'use client';
 
 import { Heart, CheckCircle } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 export interface Filters {
   favorites_only: boolean;
@@ -19,14 +19,14 @@ interface ShopFiltersProps {
   onChange: (filters: Filters) => void;
 }
 
-const FILTER_OPTIONS: { key: keyof Filters; label: string; icon?: React.ReactNode; activeClass?: string }[] = [
-  { key: 'favorites_only', label: 'Favorites', icon: <Heart className="size-3" />, activeClass: 'bg-rose-500 hover:bg-rose-600 text-white' },
-  { key: 'visited_only', label: 'Visited', icon: <CheckCircle className="size-3" />, activeClass: 'bg-emerald-500 hover:bg-emerald-600 text-white' },
-  { key: 'english_staff', label: 'English Staff' },
-  { key: 'psa_graded', label: 'PSA Graded' },
-  { key: 'booster_box', label: 'Booster Boxes' },
+const FILTER_OPTIONS: { key: keyof Filters; label: string; icon?: React.ReactNode }[] = [
+  { key: 'favorites_only', label: 'Favorites', icon: <Heart className="size-3" /> },
+  { key: 'visited_only', label: 'Visited', icon: <CheckCircle className="size-3" /> },
+  { key: 'english_staff', label: 'EN Staff' },
+  { key: 'psa_graded', label: 'PSA' },
+  { key: 'booster_box', label: 'BOX' },
+  { key: 'beginner_friendly', label: 'Beginner' },
   { key: 'singles', label: 'Singles' },
-  { key: 'beginner_friendly', label: 'Beginner Friendly' },
   { key: 'vintage', label: 'Vintage' },
 ];
 
@@ -36,23 +36,21 @@ export default function ShopFilters({ filters, onChange }: ShopFiltersProps) {
   };
 
   return (
-    <div className="flex flex-wrap gap-2 p-3">
-      {FILTER_OPTIONS.map(({ key, label, icon, activeClass }) => (
-        <Badge
+    <div className="flex gap-2 px-3 py-2.5 overflow-x-auto scrollbar-hide">
+      {FILTER_OPTIONS.map(({ key, label, icon }) => (
+        <button
           key={key}
-          variant={filters[key] ? 'default' : 'outline'}
-          className={`cursor-pointer select-none transition-colors ${
-            filters[key]
-              ? activeClass ?? 'bg-[#E3350D] hover:bg-[#c42d0b] text-white'
-              : 'hover:bg-gray-100'
-          }`}
           onClick={() => toggle(key)}
+          className={cn(
+            'shrink-0 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all select-none',
+            filters[key]
+              ? 'bg-[#FFCB05] text-[#1a1a2e] font-semibold shadow-sm'
+              : 'border border-white/20 text-white/70 hover:border-white/40 hover:text-white'
+          )}
         >
-          <span className="flex items-center gap-1">
-            {icon}
-            {label}
-          </span>
-        </Badge>
+          {icon}
+          {label}
+        </button>
       ))}
     </div>
   );

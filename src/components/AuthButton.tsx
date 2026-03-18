@@ -67,6 +67,7 @@ export default function AuthButton() {
           alt=""
           className="size-6 rounded-full"
           referrerPolicy="no-referrer"
+          loading="lazy"
         />
       )}
       <span className="text-sm hidden sm:inline">{displayName}</span>

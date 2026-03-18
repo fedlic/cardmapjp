@@ -111,7 +111,7 @@ export default async function RegionPage({ params }: PageProps) {
         </div>
 
         {/* Article content */}
-        <article className="prose prose-sm max-w-none mb-8">
+        <article className="prose prose-sm prose-invert max-w-none mb-8">
           <h2 className="text-xl font-bold">
             Why {config.name_en} for Pokemon Cards?
           </h2>
@@ -151,7 +151,7 @@ export default async function RegionPage({ params }: PageProps) {
               { label: 'English Cards', count: shops.filter((s) => s.sells_english_cards).length },
               { label: 'Oripa', count: shops.filter((s) => s.sells_oripa).length },
             ].map((cat) => (
-              <div key={cat.label} className="bg-gray-50 rounded-lg p-3 text-center">
+              <div key={cat.label} className="bg-card rounded-lg p-3 text-center">
                 <p className="text-lg font-bold text-[#E3350D]">{cat.count}</p>
                 <p className="text-xs text-muted-foreground">{cat.label}</p>
               </div>

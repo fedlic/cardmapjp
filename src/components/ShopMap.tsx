@@ -131,7 +131,7 @@ export default function ShopMap({
 
   if (!mounted) {
     return (
-      <div className={`${className} bg-gray-100 flex items-center justify-center`}>
+      <div className={`${className} bg-card flex items-center justify-center`}>
         <p className="text-sm text-muted-foreground">Loading map...</p>
       </div>
     );
@@ -146,8 +146,8 @@ export default function ShopMap({
       zoomControl={true}
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>'
+        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
       />
       <FlyToSelected shop={selectedShop} />
       <FlyToUser position={userLocation ?? null} />
@@ -173,11 +173,11 @@ export default function ShopMap({
             <Popup>
               <div className="min-w-[180px]">
                 <h3 className="font-bold text-sm">{shop.name_en}</h3>
-                <p className="text-xs text-gray-500">{shop.name_jp}</p>
+                <p className="text-xs text-muted-foreground">{shop.name_jp}</p>
                 {shop.google_rating && (
                   <p className="text-xs mt-1">
-                    <span className="text-yellow-500">&#9733;</span> {shop.google_rating}
-                    <span className="text-gray-400 ml-1">
+                    <span className="text-[#FFCB05]">&#9733;</span> {shop.google_rating}
+                    <span className="text-muted-foreground ml-1">
                       ({shop.google_review_count})
                     </span>
                   </p>

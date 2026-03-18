@@ -134,10 +134,10 @@ export const CATEGORY_ICONS: Record<InventoryCategory, string> = {
 };
 
 export const AVAILABILITY_COLORS: Record<Availability, string> = {
-  in_stock: 'bg-green-100 text-green-800',
-  limited: 'bg-yellow-100 text-yellow-800',
-  sold_out: 'bg-red-100 text-red-800',
-  unknown: 'bg-gray-100 text-gray-800',
+  in_stock: 'bg-green-500/20 text-green-400',
+  limited: 'bg-yellow-500/20 text-yellow-400',
+  sold_out: 'bg-red-500/20 text-red-400',
+  unknown: 'bg-gray-500/20 text-gray-400',
 };
 
 export const AVAILABILITY_LABELS: Record<Availability, string> = {

@@ -14,7 +14,7 @@ export default function HeroSection({ shop }: HeroSectionProps) {
       <div className="flex items-center gap-3 mt-3">
         {shop.google_rating && (
           <div className="flex items-center gap-1">
-            <span className="text-yellow-300 text-lg">★</span>
+            <span className="text-[#FFCB05] text-lg">★</span>
             <span className="font-bold text-lg">{shop.google_rating}</span>
             {shop.google_review_count && (
               <span className="text-white/70 text-sm">

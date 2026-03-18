@@ -15,7 +15,7 @@ interface ReviewListProps {
 
 function StarRating({ rating }: { rating: number }) {
   return (
-    <div className="flex text-yellow-500">
+    <div className="flex text-[#FFCB05]">
       {Array.from({ length: 5 }, (_, i) => (
         <span key={i}>{i < rating ? '\u2605' : '\u2606'}</span>
       ))}
@@ -35,6 +35,7 @@ function GoogleReviewCard({ review }: { review: GoogleReview }) {
               alt=""
               className="w-8 h-8 rounded-full shrink-0"
               referrerPolicy="no-referrer"
+              loading="lazy"
             />
           )}
           <div className="min-w-0 flex-1">

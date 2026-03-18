@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import ShopCard from './ShopCard';
 import ShopFilters, { type Filters } from './ShopFilters';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { haversineKm } from '@/lib/geo';
 import { cn } from '@/lib/utils';
 import type { UseShopPreferencesReturn } from '@/hooks/useShopPreferences';
@@ -23,22 +24,13 @@ interface ShopSidebarProps {
   onSelectShop: (shop: Shop) => void;
   preferences: UseShopPreferencesReturn;
   mapBounds?: MapBounds | null;
+  filters: Filters;
+  onFiltersChange: (filters: Filters) => void;
   userLocation?: GeoPosition | null;
   geoStatus?: GeoStatus;
   geoError?: string | null;
   onRequestLocation?: () => void;
 }
-
-const emptyFilters: Filters = {
-  favorites_only: false,
-  visited_only: false,
-  english_staff: false,
-  psa_graded: false,
-  booster_box: false,
-  singles: false,
-  beginner_friendly: false,
-  vintage: false,
-};
 
 export default function ShopSidebar({
   shops,
@@ -46,13 +38,14 @@ export default function ShopSidebar({
   onSelectShop,
   preferences,
   mapBounds,
+  filters,
+  onFiltersChange,
   userLocation,
   geoStatus = 'idle',
   geoError,
   onRequestLocation,
 }: ShopSidebarProps) {
   const [search, setSearch] = useState('');
-  const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [sortKey, setSortKey] = useState<SortKey>('name');
   const debouncedSearch = useDebounce(search, 200);
 
@@ -72,7 +65,6 @@ export default function ShopSidebar({
   const filtered = useMemo(() => {
     const list: ShopWithDistance[] = shops
       .filter((shop) => {
-        // Filter by map viewport
         if (mapBounds) {
           const { lat, lng } = shop.location;
           if (
@@ -116,9 +108,22 @@ export default function ShopSidebar({
     return list;
   }, [shops, debouncedSearch, filters, sortKey, mapBounds, userLocation, preferences]);
 
+  const { visibleItems, sentinelRef, hasMore, expandTo } = useInfiniteScroll({
+    items: filtered,
+    pageSize: 10,
+  });
+
+  // Auto-expand if selected shop is beyond visible range
+  useEffect(() => {
+    if (selectedShopId) {
+      const idx = filtered.findIndex((s) => s.id === selectedShopId);
+      if (idx >= 0) expandTo(idx);
+    }
+  }, [selectedShopId, filtered, expandTo]);
+
   return (
-    <div className="flex flex-col h-full bg-white">
-      <div className="p-3 border-b">
+    <div className="flex flex-col h-full bg-background">
+      <div className="p-3 border-b border-border">
         <div className="flex items-center justify-between mb-2">
           <div>
             <h2 className="font-bold text-lg">
@@ -144,7 +149,7 @@ export default function ShopSidebar({
                   'flex items-center gap-1 text-xs px-2 py-1 rounded border transition-colors',
                   userLocation
                     ? 'bg-[#E3350D] text-white border-[#E3350D]'
-                    : 'hover:bg-gray-100 border-gray-200'
+                    : 'hover:bg-muted border-border'
                 )}
                 title={geoError ?? 'Find shops near me'}
               >
@@ -159,7 +164,7 @@ export default function ShopSidebar({
             <select
               value={sortKey}
               onChange={(e) => setSortKey(e.target.value as SortKey)}
-              className="text-xs border rounded px-2 py-1 bg-white"
+              className="text-xs border rounded px-2 py-1 bg-card text-foreground"
             >
               <option value="name">Name</option>
               <option value="rating">Rating</option>
@@ -174,31 +179,41 @@ export default function ShopSidebar({
           className="h-9"
         />
         {geoError && geoStatus !== 'success' && (
-          <p className="text-xs text-red-500 mt-1">{geoError}</p>
+          <p className="text-xs text-red-400 mt-1">{geoError}</p>
         )}
       </div>
 
-      <ShopFilters filters={filters} onChange={setFilters} />
+      {/* Filters — visible on desktop only (mobile has fixed bottom bar) */}
+      <div className="hidden md:block">
+        <ShopFilters filters={filters} onChange={onFiltersChange} />
+      </div>
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
+      <div className="flex-1 overflow-y-auto p-3 space-y-2 pb-16 md:pb-3">
         {filtered.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">
             No shops match your filters.
           </p>
         ) : (
-          filtered.map((shop) => (
-            <ShopCard
-              key={shop.id}
-              shop={shop}
-              selected={shop.id === selectedShopId}
-              onSelect={handleSelectShop}
-              distance={shop._distance}
-              isFavorite={preferences.isFavorite(shop.id)}
-              isVisited={preferences.isVisited(shop.id)}
-              onToggleFavorite={preferences.toggleFavorite}
-              onToggleVisited={preferences.toggleVisited}
-            />
-          ))
+          <>
+            {visibleItems.map((shop) => (
+              <ShopCard
+                key={shop.id}
+                shop={shop}
+                selected={shop.id === selectedShopId}
+                onSelect={handleSelectShop}
+                distance={shop._distance}
+                isFavorite={preferences.isFavorite(shop.id)}
+                isVisited={preferences.isVisited(shop.id)}
+                onToggleFavorite={preferences.toggleFavorite}
+                onToggleVisited={preferences.toggleVisited}
+              />
+            ))}
+            {hasMore && (
+              <div ref={sentinelRef} className="flex justify-center py-4">
+                <Loader2 className="size-5 animate-spin text-muted-foreground" />
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

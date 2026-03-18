@@ -28,22 +28,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
       >
-        <header className="bg-[#E3350D] text-white px-4 py-3 flex items-center justify-between shrink-0 z-50">
+        <header className="bg-[#16213e] text-white px-4 py-2 flex items-center justify-between shrink-0 z-50 border-b border-white/10">
           <a href="/" className="flex items-center gap-2">
-            <span className="text-xl font-bold tracking-tight">CardMapJP</span>
-            <span className="text-xs bg-white/20 rounded px-1.5 py-0.5">
+            <span className="text-xl font-bold tracking-tight">
+              <span className="text-[#E3350D]">Card</span>
+              <span>MapJP</span>
+            </span>
+            <span className="text-[10px] bg-[#FFCB05] text-[#1a1a2e] font-bold rounded px-1.5 py-0.5">
               Beta
             </span>
           </a>
           <nav className="flex items-center gap-4 text-sm">
-            <a href="/" className="hover:underline">
+            <a href="/" className="text-white/70 hover:text-white transition-colors">
               Map
             </a>
-            <a href="/regions" className="hover:underline">
+            <a href="/regions" className="text-white/70 hover:text-white transition-colors">
               Regions
             </a>
             <AuthButton />

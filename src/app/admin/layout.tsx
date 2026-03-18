@@ -31,7 +31,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="flex h-[calc(100vh-52px)]">
+    <div className="light flex h-[calc(100vh-44px)] bg-white text-gray-900">
       {/* Sidebar */}
       <aside className="hidden md:flex w-56 flex-col border-r bg-gray-50">
         <div className="p-4 border-b">
@@ -73,7 +73,7 @@ export default function AdminLayout({
       </aside>
 
       {/* Mobile nav */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t z-40 flex">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 light bg-white border-t z-40 flex">
         {NAV_ITEMS.map((item) => {
           const isActive =
             item.href === '/admin'

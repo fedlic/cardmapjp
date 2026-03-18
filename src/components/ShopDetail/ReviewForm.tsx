@@ -51,8 +51,8 @@ export default function ReviewForm({ shopId, userId }: ReviewFormProps) {
 
   if (submitted) {
     return (
-      <div className="rounded-lg border bg-emerald-50 p-4 text-center">
-        <p className="text-sm font-medium text-emerald-700">
+      <div className="rounded-lg border bg-emerald-500/10 p-4 text-center">
+        <p className="text-sm font-medium text-emerald-400">
           Thanks for your review! Reload the page to see it.
         </p>
       </div>
@@ -75,7 +75,7 @@ export default function ReviewForm({ shopId, userId }: ReviewFormProps) {
             onMouseLeave={() => setHoveredRating(0)}
             className="text-2xl transition-colors"
           >
-            <span className={star <= displayRating ? 'text-yellow-500' : 'text-gray-300'}>
+            <span className={star <= displayRating ? 'text-[#FFCB05]' : 'text-muted-foreground/40'}>
               ★
             </span>
           </button>
@@ -90,7 +90,7 @@ export default function ReviewForm({ shopId, userId }: ReviewFormProps) {
         onChange={(e) => setComment(e.target.value)}
         placeholder="Share your experience (optional)"
         rows={3}
-        className="w-full rounded border px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#E3350D]/50"
+        className="w-full rounded border bg-card px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#E3350D]/50"
       />
 
       {error && <p className="text-xs text-red-500">{error}</p>}
