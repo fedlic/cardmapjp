@@ -10,14 +10,36 @@ interface RegionItem {
 }
 
 const REGIONS: RegionItem[] = [
+  // Tokyo
   { name: 'Akihabara', city: 'Tokyo', status: 'live', shops: 78, href: '/regions/akihabara' },
+  { name: 'Ikebukuro', city: 'Tokyo', status: 'live', shops: 12, href: '/regions/ikebukuro' },
+  { name: 'Shibuya', city: 'Tokyo', status: 'live', shops: 10, href: '/regions/shibuya' },
+  { name: 'Shinjuku', city: 'Tokyo', status: 'live', shops: 8, href: '/regions/shinjuku' },
+  { name: 'Nakano', city: 'Tokyo', status: 'live', shops: 8, href: '/regions/nakano' },
+  // Kanto
+  { name: 'Yokohama', city: 'Kanagawa', status: 'live', shops: 8, href: '/regions/yokohama' },
+  { name: 'Omiya', city: 'Saitama', status: 'live', shops: 7, href: '/regions/omiya' },
+  { name: 'Chiba', city: 'Chiba', status: 'live', shops: 7, href: '/regions/chiba' },
+  { name: 'Machida', city: 'Tokyo', status: 'live', shops: 6, href: '/regions/machida' },
+  { name: 'Tachikawa', city: 'Tokyo', status: 'live', shops: 7, href: '/regions/tachikawa' },
+  // Kansai
   { name: 'Nipponbashi', city: 'Osaka', status: 'live', shops: 20, href: '/regions/nipponbashi' },
+  { name: 'Teramachi / Kawaramachi', city: 'Kyoto', status: 'live', shops: 11, href: '/regions/kyoto' },
+  { name: 'Sannomiya', city: 'Kobe', status: 'live', shops: 10, href: '/regions/kobe' },
+  // Chubu
   { name: 'Osu', city: 'Nagoya', status: 'live', shops: 15, href: '/regions/osu' },
+  { name: 'Niigata', city: 'Niigata', status: 'live', shops: 6, href: '/regions/niigata' },
+  { name: 'Kanazawa', city: 'Kanazawa', status: 'live', shops: 5, href: '/regions/kanazawa' },
+  // Kyushu / Okinawa
   { name: 'Tenjin / Hakata', city: 'Fukuoka', status: 'live', shops: 15, href: '/regions/tenjin-hakata' },
-  { name: 'Shibuya', city: 'Tokyo', status: 'coming' },
-  { name: 'Shinjuku', city: 'Tokyo', status: 'coming' },
-  { name: 'Ikebukuro', city: 'Tokyo', status: 'coming' },
-  { name: 'Teramachi', city: 'Kyoto', status: 'coming' },
+  { name: 'Kumamoto', city: 'Kumamoto', status: 'live', shops: 6, href: '/regions/kumamoto' },
+  { name: 'Naha', city: 'Okinawa', status: 'live', shops: 6, href: '/regions/naha' },
+  // Chugoku
+  { name: 'Hiroshima', city: 'Hiroshima', status: 'live', shops: 10, href: '/regions/hiroshima' },
+  { name: 'Okayama', city: 'Okayama', status: 'live', shops: 7, href: '/regions/okayama' },
+  // Tohoku / Hokkaido
+  { name: 'Sapporo', city: 'Hokkaido', status: 'live', shops: 11, href: '/regions/sapporo' },
+  { name: 'Sendai', city: 'Miyagi', status: 'live', shops: 11, href: '/regions/sendai' },
 ];
 
 export default function RegionsPage() {

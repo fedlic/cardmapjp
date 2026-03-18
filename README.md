@@ -12,7 +12,7 @@ Find the best Pokemon card shops in Akihabara and across Japan with real-time in
 
 ### Interactive Map
 - OpenStreetMap-based map powered by Leaflet/react-leaflet
-- 128 card shops across 4 regions (Akihabara, Nipponbashi, Osu, Tenjin/Hakata)
+- 284 card shops across 23 regions covering all of Japan
 - Click markers to view shop summary, fly-to animation on selection
 - Color-coded markers (red = default, gold = selected)
 
@@ -48,11 +48,14 @@ Find the best Pokemon card shops in Akihabara and across Japan with real-time in
 | Accessories | Sleeves, playmats, deck boxes |
 
 ### Regions Page (`/regions`)
-- Akihabara, Tokyo (Live - 78 shops)
-- Nipponbashi, Osaka (Live - 20 shops)
-- Osu, Nagoya (Live - 15 shops)
-- Tenjin / Hakata, Fukuoka (Live - 15 shops)
-- Coming soon: Shibuya, Shinjuku, Ikebukuro, Teramachi (Kyoto)
+23 regions across Japan, including:
+- **Tokyo**: Akihabara (78), Ikebukuro (12), Shibuya (10), Shinjuku (8), Nakano (8), Machida (6), Tachikawa (7)
+- **Kanto**: Yokohama (8), Omiya (7), Chiba (7)
+- **Kansai**: Nipponbashi/Osaka (20), Kyoto (11), Kobe (10)
+- **Chubu**: Osu/Nagoya (15), Niigata (6), Kanazawa (5)
+- **Kyushu/Okinawa**: Fukuoka (15), Kumamoto (6), Naha (6)
+- **Chugoku**: Hiroshima (10), Okayama (7)
+- **Tohoku/Hokkaido**: Sapporo (11), Sendai (11)
 
 ### SEO
 - Dynamic `sitemap.xml` with all shop and region pages
@@ -285,16 +288,33 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ## Data Coverage
 
+**284 shops across 23 regions nationwide**
+
 | Region | Shops | Status |
 |--------|-------|--------|
 | Akihabara (Tokyo) | 78 | Live |
 | Nipponbashi (Osaka) | 20 | Live |
 | Osu (Nagoya) | 15 | Live |
 | Tenjin / Hakata (Fukuoka) | 15 | Live |
-| Shibuya (Tokyo) | - | Planned |
-| Shinjuku (Tokyo) | - | Planned |
-| Ikebukuro (Tokyo) | - | Planned |
-| Teramachi (Kyoto) | - | Planned |
+| Ikebukuro (Tokyo) | 12 | Live |
+| Sapporo (Hokkaido) | 11 | Live |
+| Sendai (Miyagi) | 11 | Live |
+| Teramachi / Kawaramachi (Kyoto) | 11 | Live |
+| Hiroshima | 10 | Live |
+| Sannomiya (Kobe) | 10 | Live |
+| Shibuya (Tokyo) | 10 | Live |
+| Nakano (Tokyo) | 8 | Live |
+| Shinjuku (Tokyo) | 8 | Live |
+| Yokohama (Kanagawa) | 8 | Live |
+| Chiba | 7 | Live |
+| Okayama | 7 | Live |
+| Omiya (Saitama) | 7 | Live |
+| Tachikawa (Tokyo) | 7 | Live |
+| Kumamoto | 6 | Live |
+| Machida (Tokyo) | 6 | Live |
+| Naha (Okinawa) | 6 | Live |
+| Niigata | 6 | Live |
+| Kanazawa (Ishikawa) | 5 | Live |
 
 ---
 
