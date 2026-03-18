@@ -6,7 +6,7 @@ import AISummary from '@/components/ShopDetail/AISummary';
 import InventoryGrid from '@/components/ShopDetail/InventoryGrid';
 import InfoSection from '@/components/ShopDetail/InfoSection';
 import ReviewList from '@/components/ShopDetail/ReviewList';
-import type { Shop, ShopRow, ShopInventory, Review, OpenHours } from '@/types';
+import type { Shop, ShopRow, ShopInventory, Review, GoogleReview, OpenHours } from '@/types';
 
 export const revalidate = 1800; // 30 min ISR cache
 
@@ -130,7 +130,7 @@ export default async function ShopDetailPage({ params }: PageProps) {
   const { id } = await params;
   const supabase = createServerClient();
 
-  const [row, inventoryResult, reviewsResult] = await Promise.all([
+  const [row, inventoryResult, reviewsResult, googleReviewsResult] = await Promise.all([
     getShop(id),
     supabase
       .from('shop_inventory')
@@ -142,6 +142,13 @@ export default async function ShopDetailPage({ params }: PageProps) {
       .select('*')
       .eq('shop_id', id)
       .order('created_at', { ascending: false }),
+    supabase
+      .from('google_reviews_cache')
+      .select('reviews')
+      .eq('shop_id', id)
+      .order('fetched_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   if (!row) {
@@ -160,6 +167,7 @@ export default async function ShopDetailPage({ params }: PageProps) {
   const shop: Shop = { ...row, location: { lat: row.lat, lng: row.lng } };
   const inventory = (inventoryResult.data as ShopInventory[]) || [];
   const reviews = (reviewsResult.data as Review[]) || [];
+  const googleReviews = (googleReviewsResult.data?.reviews as GoogleReview[]) || [];
 
   const jsonLd = buildJsonLd(shop);
 
@@ -181,7 +189,7 @@ export default async function ShopDetailPage({ params }: PageProps) {
         <AISummary summary={shop.ai_summary} tips={shop.visitor_tips} />
         <InventoryGrid inventory={inventory} />
         <InfoSection shop={shop} />
-        <ReviewList reviews={reviews} shopId={id} />
+        <ReviewList reviews={reviews} shopId={id} googleReviews={googleReviews} />
       </div>
     </>
   );

@@ -67,6 +67,8 @@ export default function AdminShopsPage() {
   const [form, setForm] = useState<FormData>(emptyForm());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [fetchingReviews, setFetchingReviews] = useState<string | null>(null);
+  const [reviewMsg, setReviewMsg] = useState<{ id: string; text: string; ok: boolean } | null>(null);
 
   const fetchShops = useCallback(async () => {
     const res = await fetch('/api/admin/shops');
@@ -151,6 +153,28 @@ export default function AdminShopsPage() {
     }
   }
 
+  async function fetchGoogleReviews(shopId: string) {
+    setFetchingReviews(shopId);
+    setReviewMsg(null);
+    try {
+      const res = await fetch('/api/admin/google-reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shop_id: shopId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setReviewMsg({ id: shopId, text: `Fetched ${data.count} reviews`, ok: true });
+      } else {
+        setReviewMsg({ id: shopId, text: data.error || 'Failed', ok: false });
+      }
+    } catch {
+      setReviewMsg({ id: shopId, text: 'Network error', ok: false });
+    } finally {
+      setFetchingReviews(null);
+    }
+  }
+
   if (loading) {
     return <p className="text-muted-foreground">Loading shops...</p>;
   }
@@ -216,14 +240,30 @@ export default function AdminShopsPage() {
                   {new Date(shop.updated_at).toLocaleDateString()}
                 </td>
                 <td className="p-3" onClick={(e) => e.stopPropagation()}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-600 hover:text-red-700"
-                    onClick={() => openDelete(shop)}
-                  >
-                    Delete
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-blue-600 hover:text-blue-700 text-xs"
+                      disabled={fetchingReviews === shop.id}
+                      onClick={() => fetchGoogleReviews(shop.id)}
+                    >
+                      {fetchingReviews === shop.id ? 'Fetching...' : 'Reviews'}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 hover:text-red-700"
+                      onClick={() => openDelete(shop)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                  {reviewMsg?.id === shop.id && (
+                    <span className={`text-xs ${reviewMsg.ok ? 'text-green-600' : 'text-red-600'}`}>
+                      {reviewMsg.text}
+                    </span>
+                  )}
                 </td>
               </tr>
             ))}

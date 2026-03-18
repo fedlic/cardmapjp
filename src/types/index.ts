@@ -182,6 +182,15 @@ export interface BannedUser {
   banned_by: string | null;
 }
 
+export interface GoogleReview {
+  author_name: string;
+  rating: number;
+  text: string;
+  time: number;
+  profile_photo_url?: string;
+  relative_time_description?: string;
+}
+
 // Raw DB row shape (before transforming location)
 export interface ShopRow {
   id: string;
