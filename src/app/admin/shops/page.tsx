@@ -69,6 +69,8 @@ export default function AdminShopsPage() {
   const [saving, setSaving] = useState(false);
   const [fetchingReviews, setFetchingReviews] = useState<string | null>(null);
   const [reviewMsg, setReviewMsg] = useState<{ id: string; text: string; ok: boolean } | null>(null);
+  const [bulkStatus, setBulkStatus] = useState<string | null>(null);
+  const [bulkRunning, setBulkRunning] = useState(false);
 
   const fetchShops = useCallback(async () => {
     const res = await fetch('/api/admin/shops');
@@ -153,26 +155,125 @@ export default function AdminShopsPage() {
     }
   }
 
+  const GOOGLE_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
+
+  // Search Place ID from browser using Google Places Text Search (New)
+  async function findPlaceId(shop: ShopRow): Promise<string | null> {
+    const query = `${shop.name_jp} ${(shop.address_en || '').split(',')[0]}`;
+    const url = 'https://places.googleapis.com/v1/places:searchText';
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': GOOGLE_API_KEY,
+        'X-Goog-FieldMask': 'places.id',
+      },
+      body: JSON.stringify({
+        textQuery: query,
+        locationBias: { circle: { center: { latitude: shop.lat, longitude: shop.lng }, radius: 500 } },
+        maxResultCount: 1,
+      }),
+    });
+    const data = await res.json();
+    return data.places?.[0]?.id || null;
+  }
+
+  // Fetch reviews from browser using Google Places (New) API
+  async function fetchPlaceReviews(placeId: string) {
+    const url = `https://places.googleapis.com/v1/places/${placeId}`;
+    const res = await fetch(url, {
+      headers: {
+        'X-Goog-Api-Key': GOOGLE_API_KEY,
+        'X-Goog-FieldMask': 'reviews',
+      },
+    });
+    const data = await res.json();
+    if (!data.reviews) return [];
+    // Convert to our GoogleReview format
+    return data.reviews.map((r: { authorAttribution?: { displayName?: string; photoUri?: string }; rating?: number; text?: { text?: string }; relativePublishTimeDescription?: string; publishTime?: string }) => ({
+      author_name: r.authorAttribution?.displayName || 'Anonymous',
+      rating: r.rating || 0,
+      text: r.text?.text || '',
+      time: r.publishTime ? Math.floor(new Date(r.publishTime).getTime() / 1000) : 0,
+      profile_photo_url: r.authorAttribution?.photoUri || '',
+      relative_time_description: r.relativePublishTimeDescription || '',
+    }));
+  }
+
   async function fetchGoogleReviews(shopId: string) {
     setFetchingReviews(shopId);
     setReviewMsg(null);
     try {
+      const shop = shops.find((s) => s.id === shopId);
+      if (!shop) throw new Error('Shop not found');
+
+      // Step 1: Find Place ID if missing
+      let placeId = shop.google_place_id;
+      if (!placeId) {
+        placeId = await findPlaceId(shop);
+        if (!placeId) {
+          setReviewMsg({ id: shopId, text: 'Place not found on Google', ok: false });
+          return;
+        }
+      }
+
+      // Step 2: Fetch reviews from Google
+      const reviews = await fetchPlaceReviews(placeId);
+
+      // Step 3: Save to DB via our API
       const res = await fetch('/api/admin/google-reviews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shop_id: shopId }),
+        body: JSON.stringify({ shop_id: shopId, google_place_id: placeId, reviews }),
       });
       const data = await res.json();
       if (res.ok) {
-        setReviewMsg({ id: shopId, text: `Fetched ${data.count} reviews`, ok: true });
+        // Update local state
+        shop.google_place_id = placeId;
+        setReviewMsg({ id: shopId, text: `${reviews.length} reviews saved`, ok: true });
       } else {
-        setReviewMsg({ id: shopId, text: data.error || 'Failed', ok: false });
+        setReviewMsg({ id: shopId, text: data.error || 'Save failed', ok: false });
       }
-    } catch {
-      setReviewMsg({ id: shopId, text: 'Network error', ok: false });
+    } catch (err) {
+      setReviewMsg({ id: shopId, text: String(err), ok: false });
     } finally {
       setFetchingReviews(null);
     }
+  }
+
+  async function bulkFetchAll() {
+    setBulkRunning(true);
+    setBulkStatus('Starting...');
+    let success = 0;
+    let failed = 0;
+    const activeShops = shops.filter((s) => s.is_active);
+
+    for (let i = 0; i < activeShops.length; i++) {
+      const shop = activeShops[i];
+      setBulkStatus(`${i + 1}/${activeShops.length}: ${shop.name_en}`);
+      try {
+        let placeId = shop.google_place_id;
+        if (!placeId) {
+          placeId = await findPlaceId(shop);
+          if (!placeId) { failed++; continue; }
+        }
+        const reviews = await fetchPlaceReviews(placeId);
+        await fetch('/api/admin/google-reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ shop_id: shop.id, google_place_id: placeId, reviews }),
+        });
+        shop.google_place_id = placeId;
+        success++;
+      } catch {
+        failed++;
+      }
+      // Rate limit: 200ms between requests
+      await new Promise((r) => setTimeout(r, 200));
+    }
+
+    setBulkStatus(`Done! ${success} OK, ${failed} failed`);
+    setBulkRunning(false);
   }
 
   if (loading) {
@@ -183,13 +284,26 @@ export default function AdminShopsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Shops ({shops.length})</h1>
-        <Button
-          className="bg-[#E3350D] hover:bg-[#c42d0b] text-white"
-          onClick={openNew}
-        >
-          + Add Shop
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={bulkRunning}
+            onClick={bulkFetchAll}
+          >
+            {bulkRunning ? 'Running...' : 'Fetch All Reviews'}
+          </Button>
+          <Button
+            className="bg-[#E3350D] hover:bg-[#c42d0b] text-white"
+            onClick={openNew}
+          >
+            + Add Shop
+          </Button>
+        </div>
       </div>
+      {bulkStatus && (
+        <p className="text-sm text-muted-foreground bg-gray-50 rounded p-2">{bulkStatus}</p>
+      )}
 
       <Input
         placeholder="Search shops..."
