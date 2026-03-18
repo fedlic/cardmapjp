@@ -38,7 +38,11 @@ export default function ReviewForm({ shopId, userId }: ReviewFormProps) {
     setSubmitting(false);
 
     if (insertError) {
-      setError(insertError.message);
+      if (insertError.message.includes('policy') || insertError.code === '42501') {
+        setError('Your account has been restricted from submitting reviews.');
+      } else {
+        setError(insertError.message);
+      }
       return;
     }
 

@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export default async function AdminDashboard() {
   const supabase = createServerClient();
 
-  const [shopsResult, inventoryResult, recentResult] = await Promise.all([
+  const [shopsResult, inventoryResult, recentResult, reviewsResult, usersResult] = await Promise.all([
     supabase
       .from('shops_with_coords')
       .select('id, is_active, google_rating'),
@@ -19,6 +19,10 @@ export default async function AdminDashboard() {
       .select('id, name_en, updated_at, is_active')
       .order('updated_at', { ascending: false })
       .limit(5),
+    supabase
+      .from('reviews')
+      .select('id, rating, user_id'),
+    supabase.auth.admin.listUsers({ perPage: 1000 }),
   ]);
 
   const shops = (shopsResult.data ?? []) as { id: string; is_active: boolean; google_rating: number | null }[];
@@ -35,6 +39,15 @@ export default async function AdminDashboard() {
   const inStock = inventory.filter((i) => i.availability === 'in_stock').length;
   const limited = inventory.filter((i) => i.availability === 'limited').length;
   const soldOut = inventory.filter((i) => i.availability === 'sold_out').length;
+
+  const reviews = (reviewsResult.data ?? []) as { id: string; rating: number; user_id: string }[];
+  const totalReviews = reviews.length;
+  const reviewRatings = reviews.map((r) => r.rating).filter((r): r is number => r !== null);
+  const avgReviewRating = reviewRatings.length > 0
+    ? (reviewRatings.reduce((a, b) => a + b, 0) / reviewRatings.length).toFixed(1)
+    : 'N/A';
+  const totalUsers = usersResult.data?.users?.length ?? 0;
+  const activeReviewers = new Set(reviews.map((r) => r.user_id)).size;
 
   return (
     <div className="space-y-6">
@@ -58,6 +71,34 @@ export default async function AdminDashboard() {
           <CardContent className="p-5">
             <p className="text-sm text-muted-foreground">Avg Rating</p>
             <p className="text-3xl font-bold">{avgRating}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* User & Review Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-5">
+            <p className="text-sm text-muted-foreground">Registered Users</p>
+            <p className="text-3xl font-bold">{totalUsers}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-5">
+            <p className="text-sm text-muted-foreground">Active Reviewers</p>
+            <p className="text-3xl font-bold text-blue-600">{activeReviewers}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-5">
+            <p className="text-sm text-muted-foreground">Total Reviews</p>
+            <p className="text-3xl font-bold">{totalReviews}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-5">
+            <p className="text-sm text-muted-foreground">Avg Review Rating</p>
+            <p className="text-3xl font-bold">{avgReviewRating}</p>
           </CardContent>
         </Card>
       </div>

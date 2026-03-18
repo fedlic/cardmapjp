@@ -147,6 +147,41 @@ export const AVAILABILITY_LABELS: Record<Availability, string> = {
   unknown: 'Unknown',
 };
 
+// Admin member management types
+export interface AdminUser {
+  id: string;
+  email: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  last_sign_in_at: string | null;
+  review_count: number;
+  is_banned: boolean;
+}
+
+export interface AdminReview {
+  id: string;
+  shop_id: string;
+  user_id: string;
+  rating: number;
+  english_staff_rating: number | null;
+  selection_rating: number | null;
+  comment_en: string | null;
+  visited_at: string | null;
+  created_at: string;
+  shop_name_en?: string;
+  user_email?: string;
+  user_full_name?: string;
+}
+
+export interface BannedUser {
+  id: string;
+  user_id: string;
+  reason: string | null;
+  banned_at: string;
+  banned_by: string | null;
+}
+
 // Raw DB row shape (before transforming location)
 export interface ShopRow {
   id: string;
