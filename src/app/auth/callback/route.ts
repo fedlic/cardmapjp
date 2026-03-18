@@ -10,7 +10,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/?auth_error=missing_code`);
   }
 
-  const response = NextResponse.redirect(`${origin}${next}`);
+  // Collect cookies to set on the final response
+  const cookiesToSetOnResponse: { name: string; value: string; options: Record<string, unknown> }[] = [];
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,9 +22,7 @@ export async function GET(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          );
+          cookiesToSet.forEach((cookie) => cookiesToSetOnResponse.push(cookie));
         },
       },
     }
@@ -32,8 +31,15 @@ export async function GET(request: NextRequest) {
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
+    console.error('Auth callback error:', error.message);
     return NextResponse.redirect(`${origin}/?auth_error=exchange_failed`);
   }
+
+  // Build redirect response and apply all cookies
+  const response = NextResponse.redirect(`${origin}${next}`);
+  cookiesToSetOnResponse.forEach(({ name, value, options }) => {
+    response.cookies.set(name, value, options as Parameters<typeof response.cookies.set>[2]);
+  });
 
   return response;
 }

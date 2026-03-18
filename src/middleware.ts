@@ -6,6 +6,11 @@ const ADMIN_PUBLIC_PATHS = ['/admin/login', '/api/admin/login'];
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Skip session refresh on auth callback (PKCE code exchange handles its own cookies)
+  if (pathname === '/auth/callback') {
+    return NextResponse.next();
+  }
+
   // --- Supabase session refresh (all routes) ---
   let response = NextResponse.next({ request });
 
