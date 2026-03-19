@@ -38,7 +38,7 @@ interface ShopListClientProps {
 
 export default function ShopListClient({ shops }: ShopListClientProps) {
   const searchParams = useSearchParams();
-  const [showMap, setShowMap] = useState(false);
+  const [showMap, setShowMap] = useState(true);
   const { position: userLocation } = useGeolocation();
 
   const regionParam = searchParams.get('region');
