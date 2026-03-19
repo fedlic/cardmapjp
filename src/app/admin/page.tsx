@@ -1,6 +1,7 @@
 import { createServerClient } from '@/lib/supabase/server';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import FetchReviewsButton from '@/components/admin/FetchReviewsButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -121,6 +122,17 @@ export default async function AdminDashboard() {
               <span className="font-medium">{soldOut}</span>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Google Reviews */}
+      <Card>
+        <CardContent className="p-5">
+          <h2 className="font-semibold mb-3">Google Reviews</h2>
+          <p className="text-sm text-gray-500 mb-3">
+            Fetch reviews from Google Places API (New) for all shops. Skips shops with fresh cache (7 days).
+          </p>
+          <FetchReviewsButton />
         </CardContent>
       </Card>
 
