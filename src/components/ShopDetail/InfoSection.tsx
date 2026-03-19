@@ -1,19 +1,8 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { getDirectionsUrl } from '@/lib/google-maps';
 import type { Shop, OpenHours } from '@/types';
 
 interface InfoSectionProps {
   shop: Shop;
 }
-
-const PAYMENT_LABELS: Record<string, string> = {
-  cash: 'Cash',
-  visa: 'Visa',
-  mastercard: 'Mastercard',
-  ic: 'IC Card (Suica/Pasmo)',
-};
 
 const DAY_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 const DAY_LABELS: Record<string, string> = {
@@ -21,20 +10,24 @@ const DAY_LABELS: Record<string, string> = {
   friday: 'Fri', saturday: 'Sat', sunday: 'Sun',
 };
 
+const PAYMENT_LABELS: Record<string, string> = {
+  cash: 'Cash', visa: 'Visa', mastercard: 'Mastercard', ic: 'IC Card',
+};
+
 function OpenHoursDisplay({ hours }: { hours: OpenHours }) {
   const entries = DAY_ORDER.filter((d) => d in hours);
   if (entries.length === 0) return null;
 
   return (
-    <div>
-      <h3 className="text-sm font-medium text-muted-foreground">Hours</h3>
-      <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 mt-1 text-sm">
+    <div className="py-3 border-b border-gray-100">
+      <h3 className="text-xs font-medium text-gray-400 mb-2">Hours</h3>
+      <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
         {entries.map((day) => {
           const slot = hours[day];
           return (
             <div key={day} className="contents">
-              <span className="font-medium">{DAY_LABELS[day] ?? day}</span>
-              <span>{slot ? `${slot.open} – ${slot.close}` : 'Closed'}</span>
+              <span className="font-medium text-gray-900">{DAY_LABELS[day]}</span>
+              <span className="text-gray-600">{slot ? `${slot.open} - ${slot.close}` : 'Closed'}</span>
             </div>
           );
         })}
@@ -44,104 +37,74 @@ function OpenHoursDisplay({ hours }: { hours: OpenHours }) {
 }
 
 export default function InfoSection({ shop }: InfoSectionProps) {
-  const directionsUrl = getDirectionsUrl(
-    shop.location.lat,
-    shop.location.lng,
-    shop.name_en
-  );
-
   return (
-    <div className="space-y-4">
-      <h2 className="font-semibold text-lg">Shop Info</h2>
+    <div>
+      <h2 className="font-semibold text-lg text-gray-900 mb-3">Shop Info</h2>
 
-      <Card>
-        <CardContent className="p-4 space-y-4">
-          {/* Address */}
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Address
-            </h3>
-            <p className="text-sm">{shop.address_en}</p>
-            {shop.address_jp && (
-              <p className="text-xs text-muted-foreground">{shop.address_jp}</p>
-            )}
-            {shop.floor_label && (
-              <p className="text-xs text-muted-foreground">
-                Floor: {shop.floor_label}
-              </p>
-            )}
+      <div className="bg-white rounded-lg border border-gray-100 shadow-sm">
+        {/* Address */}
+        <div className="p-4 border-b border-gray-100">
+          <h3 className="text-xs font-medium text-gray-400 mb-1">Address</h3>
+          <p className="text-sm text-gray-900">{shop.address_en}</p>
+          {shop.address_jp && <p className="text-xs text-gray-400 mt-0.5">{shop.address_jp}</p>}
+          {shop.floor_label && <p className="text-xs text-gray-400">Floor: {shop.floor_label}</p>}
+        </div>
+
+        {/* Hours */}
+        {shop.open_hours && (
+          <div className="px-4">
+            <OpenHoursDisplay hours={shop.open_hours} />
           </div>
+        )}
 
-          {/* Hours */}
-          {shop.open_hours && <OpenHoursDisplay hours={shop.open_hours} />}
-
-          {/* Payment */}
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Payment Methods
-            </h3>
-            <div className="flex flex-wrap gap-1 mt-1">
-              {shop.payment_methods.map((m) => (
-                <Badge key={m} variant="outline" className="text-xs">
-                  {PAYMENT_LABELS[m] || m}
-                </Badge>
-              ))}
-            </div>
+        {/* Payment */}
+        <div className="p-4 border-b border-gray-100">
+          <h3 className="text-xs font-medium text-gray-400 mb-2">Payment</h3>
+          <div className="flex flex-wrap gap-1.5">
+            {shop.payment_methods.map((m) => (
+              <span key={m} className="text-xs bg-gray-100 text-gray-600 rounded px-2 py-0.5">
+                {PAYMENT_LABELS[m] || m}
+              </span>
+            ))}
           </div>
+        </div>
 
-          {/* ATM */}
-          {shop.atm_nearby && shop.atm_note && (
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground">
-                Nearest ATM
-              </h3>
-              <p className="text-sm">{shop.atm_note}</p>
-            </div>
-          )}
-
-          {/* Language */}
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground">
-              English Support
-            </h3>
-            <p className="text-sm">
-              {shop.english_staff
-                ? `Yes${shop.english_staff_days ? ` — ${shop.english_staff_days}` : ''}`
-                : 'Limited / None'}
-            </p>
+        {/* ATM */}
+        {shop.atm_nearby && shop.atm_note && (
+          <div className="p-4 border-b border-gray-100">
+            <h3 className="text-xs font-medium text-gray-400 mb-1">Nearest ATM</h3>
+            <p className="text-sm text-gray-700">{shop.atm_note}</p>
           </div>
+        )}
 
-          {/* Links */}
-          <div className="flex flex-wrap gap-2">
+        {/* English Support */}
+        <div className="p-4 border-b border-gray-100">
+          <h3 className="text-xs font-medium text-gray-400 mb-1">English Support</h3>
+          <p className="text-sm text-gray-700">
+            {shop.english_staff
+              ? `Yes${shop.english_staff_days ? ` - ${shop.english_staff_days}` : ''}`
+              : 'Limited / None'}
+          </p>
+        </div>
+
+        {/* Links */}
+        {(shop.website_url || shop.twitter_handle) && (
+          <div className="p-4 flex flex-wrap gap-3">
             {shop.website_url && (
-              <a
-                href={shop.website_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-[#E3350D] hover:underline"
-              >
+              <a href={shop.website_url} target="_blank" rel="noopener noreferrer"
+                className="text-sm text-[#E3350D] hover:underline">
                 Website
               </a>
             )}
             {shop.twitter_handle && (
-              <a
-                href={`https://x.com/${shop.twitter_handle}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-[#E3350D] hover:underline"
-              >
+              <a href={`https://x.com/${shop.twitter_handle}`} target="_blank" rel="noopener noreferrer"
+                className="text-sm text-[#E3350D] hover:underline">
                 @{shop.twitter_handle}
               </a>
             )}
           </div>
-        </CardContent>
-      </Card>
-
-      <a href={directionsUrl} target="_blank" rel="noopener noreferrer">
-        <Button className="w-full bg-[#E3350D] hover:bg-[#c42d0b] text-white">
-          Get Directions
-        </Button>
-      </a>
+        )}
+      </div>
     </div>
   );
 }

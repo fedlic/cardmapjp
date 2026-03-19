@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { createClient } from '@/lib/supabase/client';
 import ReviewForm from './ReviewForm';
 import type { Review, GoogleReview } from '@/types';
@@ -26,58 +24,55 @@ function StarRating({ rating }: { rating: number }) {
 function GoogleReviewCard({ review }: { review: GoogleReview }) {
   const date = new Date(review.time * 1000);
   return (
-    <Card>
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
-          {review.profile_photo_url && (
-            <img
-              src={review.profile_photo_url}
-              alt=""
-              className="w-8 h-8 rounded-full shrink-0"
-              referrerPolicy="no-referrer"
-              loading="lazy"
-            />
-          )}
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-sm font-medium truncate">{review.author_name}</span>
-              <span className="text-xs text-muted-foreground">
-                {review.relative_time_description || date.toLocaleDateString()}
-              </span>
-            </div>
-            <StarRating rating={review.rating} />
-            {review.text && (
-              <p className="text-sm mt-2 text-muted-foreground">{review.text}</p>
-            )}
+    <div className="bg-white rounded-lg border border-gray-100 p-4 shadow-sm">
+      <div className="flex items-start gap-3">
+        {review.profile_photo_url && (
+          <img
+            src={review.profile_photo_url}
+            alt=""
+            className="w-8 h-8 rounded-full shrink-0"
+            referrerPolicy="no-referrer"
+            loading="lazy"
+          />
+        )}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-sm font-medium text-gray-900 truncate">{review.author_name}</span>
+            <span className="text-xs text-gray-400">
+              {review.relative_time_description || date.toLocaleDateString()}
+            </span>
           </div>
+          <StarRating rating={review.rating} />
+          {review.text && (
+            <p className="text-sm mt-2 text-gray-600">{review.text}</p>
+          )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
 function UserReviewCard({ review }: { review: Review }) {
   return (
-    <Card>
-      <CardContent className="p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <StarRating rating={review.rating} />
-          {review.visited_at && (
-            <span className="text-xs text-muted-foreground">
-              Visited {new Date(review.visited_at).toLocaleDateString()}
-            </span>
-          )}
-        </div>
-        {review.comment_en && (
-          <p className="text-sm">{review.comment_en}</p>
+    <div className="bg-white rounded-lg border border-gray-100 p-4 shadow-sm">
+      <div className="flex items-center gap-2 mb-2">
+        <StarRating rating={review.rating} />
+        {review.visited_at && (
+          <span className="text-xs text-gray-400">
+            Visited {new Date(review.visited_at).toLocaleDateString()}
+          </span>
         )}
-      </CardContent>
-    </Card>
+      </div>
+      {review.comment_en && (
+        <p className="text-sm text-gray-700">{review.comment_en}</p>
+      )}
+    </div>
   );
 }
 
 export default function ReviewList({ reviews, shopId, googleReviews = [] }: ReviewListProps) {
   const [userId, setUserId] = useState<string | null>(null);
+  const [tab, setTab] = useState<'google' | 'user'>(googleReviews.length > 0 ? 'google' : 'user');
 
   useEffect(() => {
     const supabase = createClient();
@@ -96,72 +91,56 @@ export default function ReviewList({ reviews, shopId, googleReviews = [] }: Revi
 
   const hasGoogle = googleReviews.length > 0;
 
-  const userReviewsContent = (
-    <>
-      {userId ? (
-        <div className="mb-4">
-          <ReviewForm shopId={shopId} userId={userId} />
+  return (
+    <div>
+      <h2 className="font-semibold text-lg text-gray-900 mb-3">Reviews</h2>
+
+      {hasGoogle && (
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setTab('google')}
+            className={`text-sm font-medium px-3 py-1.5 rounded-full transition-colors ${
+              tab === 'google' ? 'bg-[#E3350D] text-white' : 'bg-gray-100 text-gray-500'
+            }`}
+          >
+            Google ({googleReviews.length})
+          </button>
+          <button
+            onClick={() => setTab('user')}
+            className={`text-sm font-medium px-3 py-1.5 rounded-full transition-colors ${
+              tab === 'user' ? 'bg-[#E3350D] text-white' : 'bg-gray-100 text-gray-500'
+            }`}
+          >
+            User ({reviews.length})
+          </button>
         </div>
-      ) : (
-        <p className="text-sm text-muted-foreground mb-4">
-          <a href="#" className="text-[#E3350D] hover:underline" onClick={(e) => {
-            e.preventDefault();
-            handleSignIn();
-          }}>
-            Sign in with Google
-          </a>
-          {' '}to leave a review.
-        </p>
       )}
 
-      {reviews.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No reviews yet. Be the first to review this shop!
-        </p>
-      ) : (
+      {(!hasGoogle || tab === 'user') && (
         <div className="space-y-3">
-          {reviews.map((review) => (
-            <UserReviewCard key={review.id} review={review} />
+          {userId ? (
+            <ReviewForm shopId={shopId} userId={userId} />
+          ) : (
+            <p className="text-sm text-gray-500 mb-3">
+              <button onClick={handleSignIn} className="text-[#E3350D] hover:underline">Sign in with Google</button>
+              {' '}to leave a review.
+            </p>
+          )}
+          {reviews.length === 0 ? (
+            <p className="text-sm text-gray-400">No reviews yet. Be the first!</p>
+          ) : (
+            reviews.map((review) => <UserReviewCard key={review.id} review={review} />)
+          )}
+        </div>
+      )}
+
+      {hasGoogle && tab === 'google' && (
+        <div className="space-y-3">
+          {googleReviews.map((review, i) => (
+            <GoogleReviewCard key={`${review.author_name}-${i}`} review={review} />
           ))}
         </div>
       )}
-    </>
-  );
-
-  if (!hasGoogle) {
-    return (
-      <div>
-        <h2 className="font-semibold text-lg mb-3">
-          Reviews{reviews.length > 0 && ` (${reviews.length})`}
-        </h2>
-        {userReviewsContent}
-      </div>
-    );
-  }
-
-  return (
-    <div>
-      <h2 className="font-semibold text-lg mb-3">Reviews</h2>
-      <Tabs defaultValue="google">
-        <TabsList className="mb-3">
-          <TabsTrigger value="google">
-            Google Reviews ({googleReviews.length})
-          </TabsTrigger>
-          <TabsTrigger value="user">
-            User Reviews ({reviews.length})
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="google">
-          <div className="space-y-3">
-            {googleReviews.map((review, i) => (
-              <GoogleReviewCard key={`${review.author_name}-${i}`} review={review} />
-            ))}
-          </div>
-        </TabsContent>
-        <TabsContent value="user">
-          {userReviewsContent}
-        </TabsContent>
-      </Tabs>
     </div>
   );
 }

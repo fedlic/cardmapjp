@@ -1,14 +1,10 @@
 import { cache } from 'react';
 import type { Metadata } from 'next';
 import { createServerClient } from '@/lib/supabase/server';
-import HeroSection from '@/components/ShopDetail/HeroSection';
-import AISummary from '@/components/ShopDetail/AISummary';
-import InventoryGrid from '@/components/ShopDetail/InventoryGrid';
-import InfoSection from '@/components/ShopDetail/InfoSection';
-import ReviewList from '@/components/ShopDetail/ReviewList';
+import ShopDetailContent from '@/components/ShopDetail/ShopDetailContent';
 import type { Shop, ShopRow, ShopInventory, Review, GoogleReview, OpenHours } from '@/types';
 
-export const revalidate = 1800; // 30 min ISR cache
+export const revalidate = 1800;
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -39,28 +35,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const row = await getShop(id);
   if (!row) return { title: 'Shop Not Found' };
 
-  const title = `${row.name_en} | Pokemon Cards Akihabara | CardMapJP`;
+  const title = `${row.name_en} | Pokemon Cards | CardMapJP`;
   const descParts: string[] = [];
   if (row.open_hours) {
-    const mon = row.open_hours['monday'];
-    if (mon) descParts.push(`Open ${mon.open}–${mon.close}`);
+    const mon = (row.open_hours as OpenHours)['monday'];
+    if (mon) descParts.push(`Open ${mon.open}-${mon.close}`);
   }
   if (row.english_staff) descParts.push('English staff available');
-  if (row.google_rating) descParts.push(`★${row.google_rating} rating`);
+  if (row.google_rating) descParts.push(`Rating ${row.google_rating}`);
   const descSuffix = descParts.length > 0 ? ` ${descParts.join('. ')}.` : '';
   const description = row.ai_summary
     ? row.ai_summary.slice(0, 140) + descSuffix
-    : `Find Pokemon cards at ${row.name_en} (${row.name_jp}) in Akihabara, Tokyo.${descSuffix} Directions, hours, inventory & reviews.`;
+    : `Find Pokemon cards at ${row.name_en} (${row.name_jp}).${descSuffix} Directions, hours, inventory & reviews.`;
 
   return {
     title,
     description,
-    openGraph: {
-      title,
-      description,
-      type: 'website',
-      url: `https://cardmapjp.vercel.app/shops/${id}`,
-    },
+    openGraph: { title, description, type: 'website', url: `https://cardmapjp.vercel.app/shops/${id}` },
   };
 }
 
@@ -80,10 +71,7 @@ function formatOpeningHours(hours: OpenHours): string[] {
 }
 
 const PAYMENT_MAP: Record<string, string> = {
-  cash: 'Cash',
-  visa: 'Visa',
-  mastercard: 'MasterCard',
-  ic: 'IC Card',
+  cash: 'Cash', visa: 'Visa', mastercard: 'MasterCard', ic: 'IC Card',
 };
 
 function buildJsonLd(shop: Shop) {
@@ -93,36 +81,18 @@ function buildJsonLd(shop: Shop) {
     name: shop.name_en,
     alternateName: shop.name_jp,
     url: `https://cardmapjp.vercel.app/shops/${shop.id}`,
-    geo: {
-      '@type': 'GeoCoordinates',
-      latitude: shop.location.lat,
-      longitude: shop.location.lng,
-    },
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: shop.address_en,
-      addressLocality: 'Tokyo',
-      addressCountry: 'JP',
-    },
+    geo: { '@type': 'GeoCoordinates', latitude: shop.location.lat, longitude: shop.location.lng },
+    address: { '@type': 'PostalAddress', streetAddress: shop.address_en, addressLocality: 'Tokyo', addressCountry: 'JP' },
   };
-
   if (shop.phone) ld.telephone = shop.phone;
   if (shop.website_url) ld.sameAs = shop.website_url;
   if (shop.open_hours) ld.openingHours = formatOpeningHours(shop.open_hours);
   if (shop.payment_methods?.length) {
-    ld.paymentAccepted = shop.payment_methods
-      .map((m) => PAYMENT_MAP[m] || m)
-      .join(', ');
+    ld.paymentAccepted = shop.payment_methods.map((m) => PAYMENT_MAP[m] || m).join(', ');
   }
   if (shop.google_rating) {
-    ld.aggregateRating = {
-      '@type': 'AggregateRating',
-      ratingValue: shop.google_rating,
-      reviewCount: shop.google_review_count ?? 0,
-      bestRating: 5,
-    };
+    ld.aggregateRating = { '@type': 'AggregateRating', ratingValue: shop.google_rating, reviewCount: shop.google_review_count ?? 0, bestRating: 5 };
   }
-
   return ld;
 }
 
@@ -132,33 +102,17 @@ export default async function ShopDetailPage({ params }: PageProps) {
 
   const [row, inventoryResult, reviewsResult, googleReviewsResult] = await Promise.all([
     getShop(id),
-    supabase
-      .from('shop_inventory')
-      .select('*')
-      .eq('shop_id', id)
-      .order('category'),
-    supabase
-      .from('reviews')
-      .select('*')
-      .eq('shop_id', id)
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('google_reviews_cache')
-      .select('reviews')
-      .eq('shop_id', id)
-      .order('fetched_at', { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+    supabase.from('shop_inventory').select('*').eq('shop_id', id).order('category'),
+    supabase.from('reviews').select('*').eq('shop_id', id).order('created_at', { ascending: false }),
+    supabase.from('google_reviews_cache').select('reviews').eq('shop_id', id).order('fetched_at', { ascending: false }).limit(1).maybeSingle(),
   ]);
 
   if (!row) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <p className="text-lg font-semibold">Shop not found</p>
-          <a href="/" className="text-sm text-[#E3350D] hover:underline mt-2 inline-block">
-            Back to map
-          </a>
+          <p className="text-lg font-semibold text-gray-900">Shop not found</p>
+          <a href="/" className="text-sm text-[#E3350D] hover:underline mt-2 inline-block">Back to shops</a>
         </div>
       </div>
     );
@@ -168,29 +122,12 @@ export default async function ShopDetailPage({ params }: PageProps) {
   const inventory = (inventoryResult.data as ShopInventory[]) || [];
   const reviews = (reviewsResult.data as Review[]) || [];
   const googleReviews = (googleReviewsResult.data?.reviews as GoogleReview[]) || [];
-
   const jsonLd = buildJsonLd(shop);
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-        <a
-          href="/"
-          className="text-sm text-[#E3350D] hover:underline inline-block mb-2"
-        >
-          &larr; Back to map
-        </a>
-
-        <HeroSection shop={shop} />
-        <AISummary summary={shop.ai_summary} tips={shop.visitor_tips} />
-        <InventoryGrid inventory={inventory} />
-        <InfoSection shop={shop} />
-        <ReviewList reviews={reviews} shopId={id} googleReviews={googleReviews} />
-      </div>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <ShopDetailContent shop={shop} inventory={inventory} reviews={reviews} googleReviews={googleReviews} />
     </>
   );
 }

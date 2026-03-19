@@ -1,19 +1,19 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { createServerClient } from '@/lib/supabase/server';
-import HomePageClient from '@/components/HomePageClient';
+import ShopListClient from '@/components/ShopListClient';
 import type { Shop, ShopRow } from '@/types';
 
-export const revalidate = 300; // 5 min ISR cache
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: 'Pokemon Card Shops in Akihabara, Tokyo | CardMapJP',
   description:
-    'Find the best Pokemon card shops in Akihabara, Tokyo. Interactive map with 78+ shops, real-time inventory, English support info, directions, and visitor tips for foreign collectors.',
+    'Find the best Pokemon card shops in Akihabara, Tokyo. Interactive map with 284+ shops, real-time inventory, English support info, directions, and visitor tips for foreign collectors.',
   openGraph: {
     title: 'Pokemon Card Shops in Akihabara, Tokyo | CardMapJP',
     description:
-      'Interactive map of 78+ Pokemon card shops in Akihabara. Inventory, English staff info, hours & directions.',
+      'Interactive map of 284+ Pokemon card shops in Japan. Inventory, English staff info, hours & directions.',
     type: 'website',
     url: 'https://cardmapjp.vercel.app',
   },
@@ -26,6 +26,7 @@ const SHOP_LIST_COLUMNS = [
   'sells_singles', 'sells_booster_box', 'sells_psa_graded',
   'sells_oripa', 'sells_english_cards', 'sells_vintage',
   'google_rating', 'google_review_count',
+  'open_hours',
   'is_active',
 ].join(',');
 
@@ -47,10 +48,10 @@ export default async function HomePage() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-52px)]">
+      <div className="flex items-center justify-center h-[calc(100vh-48px)]">
         <div className="text-center">
           <p className="text-lg font-semibold text-red-600">Error</p>
-          <p className="text-sm text-muted-foreground">Failed to load shops</p>
+          <p className="text-sm text-gray-500">Failed to load shops</p>
         </div>
       </div>
     );
@@ -59,8 +60,14 @@ export default async function HomePage() {
   const shops = (data as unknown as ShopRow[]).map(rowToShop);
 
   return (
-    <Suspense>
-      <HomePageClient shops={shops} />
+    <Suspense fallback={
+      <div className="px-4 py-6 space-y-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="bg-gray-100 rounded-[10px] h-24 animate-pulse" />
+        ))}
+      </div>
+    }>
+      <ShopListClient shops={shops} />
     </Suspense>
   );
 }
