@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 
 const CACHE_TTL_DAYS = 7;
+const BATCH_SIZE = 10;
 
 interface PlaceReview {
   authorAttribution?: { displayName?: string; photoUri?: string };
@@ -86,7 +87,10 @@ function transformReviews(placeReviews: PlaceReview[]) {
 }
 
 // POST /api/admin/fetch-reviews
-// Body: { shop_id } for single shop or { all: true } for all shops
+// Body options:
+//   { shop_id }        - single shop
+//   { shop_ids: [...] } - batch of shops (used by client batching)
+//   { all: true }       - returns list of stale shop IDs for client to batch
 export async function POST(request: NextRequest) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   if (!apiKey) {
@@ -112,11 +116,39 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result);
   }
 
-  // Bulk fetch for all shops
-  if (body.all) {
+  // Batch fetch for specific shop IDs
+  if (body.shop_ids && Array.isArray(body.shop_ids)) {
+    const ids = body.shop_ids.slice(0, BATCH_SIZE);
     const { data: shops, error: shopsError } = await supabase
       .from('shops_with_coords')
       .select('id, name_en, name_jp, google_place_id, lat, lng')
+      .in('id', ids);
+
+    if (shopsError || !shops) {
+      return NextResponse.json({ error: 'Failed to fetch shops' }, { status: 500 });
+    }
+
+    let success = 0;
+    let failed = 0;
+    const results: { name: string; count: number; error?: string }[] = [];
+
+    for (const shop of shops) {
+      const result = await fetchSingleShopReviews(supabase, shop, apiKey);
+      results.push({ name: shop.name_en, count: result.count ?? 0, error: result.error });
+      if (result.error) failed++;
+      else success++;
+
+      await new Promise((r) => setTimeout(r, 300));
+    }
+
+    return NextResponse.json({ success, failed, results });
+  }
+
+  // "all: true" now returns stale shop IDs for client-side batching
+  if (body.all) {
+    const { data: shops, error: shopsError } = await supabase
+      .from('shops_with_coords')
+      .select('id, name_en')
       .eq('is_active', true)
       .order('name_en');
 
@@ -124,7 +156,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch shops' }, { status: 500 });
     }
 
-    // Check which shops have fresh cache
     const { data: cached } = await supabase
       .from('google_reviews_cache')
       .select('shop_id, fetched_at');
@@ -143,31 +174,14 @@ export async function POST(request: NextRequest) {
       return new Date(fetchedAt) < cutoff;
     });
 
-    let success = 0;
-    let failed = 0;
-    const results: { name: string; count: number; error?: string }[] = [];
-
-    for (const shop of staleShops) {
-      const result = await fetchSingleShopReviews(supabase, shop, apiKey);
-      results.push({ name: shop.name_en, count: result.count ?? 0, error: result.error });
-      if (result.error) failed++;
-      else success++;
-
-      // Rate limiting
-      await new Promise((r) => setTimeout(r, 300));
-    }
-
     return NextResponse.json({
       total: shops.length,
-      processed: staleShops.length,
+      staleIds: staleShops.map((s: { id: string }) => s.id),
       skipped: shops.length - staleShops.length,
-      success,
-      failed,
-      results,
     });
   }
 
-  return NextResponse.json({ error: 'Provide shop_id or all: true' }, { status: 400 });
+  return NextResponse.json({ error: 'Provide shop_id, shop_ids, or all: true' }, { status: 400 });
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -178,7 +192,6 @@ async function fetchSingleShopReviews(supabase: any, shop: any, apiKey: string) 
   let userRatingCount: number | undefined;
 
   if (placeId) {
-    // Direct fetch by place_id
     const result = await fetchReviewsFromPlacesAPI(placeId, apiKey);
     if (result.error) {
       return { error: result.error, count: 0 };
@@ -187,7 +200,6 @@ async function fetchSingleShopReviews(supabase: any, shop: any, apiKey: string) 
     rating = result.rating;
     userRatingCount = result.userRatingCount;
   } else {
-    // Search by name + location
     const result = await searchPlaceAndFetchReviews(
       shop.name_en || shop.name_jp,
       shop.lat,
@@ -202,7 +214,6 @@ async function fetchSingleShopReviews(supabase: any, shop: any, apiKey: string) 
     rating = result.rating;
     userRatingCount = result.userRatingCount;
 
-    // Save discovered place_id
     if (placeId) {
       await supabase.from('shops').update({ google_place_id: placeId }).eq('id', shop.id);
     }
