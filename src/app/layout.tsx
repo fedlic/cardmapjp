@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import AuthButton from "@/components/AuthButton";
 import "./globals.css";
@@ -48,6 +49,11 @@ export default function RootLayout({
             <AuthButton />
           </nav>
         </header>
+        <Script
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8620642498629308"
+          strategy="beforeInteractive"
+          crossOrigin="anonymous"
+        />
         <main>{children}</main>
       </body>
     </html>
