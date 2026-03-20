@@ -14,14 +14,15 @@ interface PlaceReview {
 async function fetchReviewsFromPlacesAPI(
   googlePlaceId: string,
   apiKey: string
-): Promise<{ reviews: PlaceReview[]; error?: string }> {
+): Promise<{ reviews: PlaceReview[]; rating?: number; userRatingCount?: number; error?: string }> {
   const res = await fetch(
     `https://places.googleapis.com/v1/places/${googlePlaceId}`,
     {
       headers: {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': apiKey,
-        'X-Goog-FieldMask': 'reviews',
+        'X-Goog-FieldMask': 'reviews,rating,userRatingCount',
+        Referer: 'https://cardmapjp.vercel.app/',
       },
     }
   );
@@ -30,7 +31,7 @@ async function fetchReviewsFromPlacesAPI(
   if (data.error) {
     return { reviews: [], error: data.error.message };
   }
-  return { reviews: data.reviews ?? [] };
+  return { reviews: data.reviews ?? [], rating: data.rating, userRatingCount: data.userRatingCount };
 }
 
 async function searchPlaceAndFetchReviews(
@@ -38,7 +39,7 @@ async function searchPlaceAndFetchReviews(
   lat: number,
   lng: number,
   apiKey: string
-): Promise<{ placeId: string | null; reviews: PlaceReview[]; error?: string }> {
+): Promise<{ placeId: string | null; reviews: PlaceReview[]; rating?: number; userRatingCount?: number; error?: string }> {
   const query = `${shopName} pokemon card shop`;
   const body = {
     textQuery: query,
@@ -54,7 +55,8 @@ async function searchPlaceAndFetchReviews(
     headers: {
       'Content-Type': 'application/json',
       'X-Goog-Api-Key': apiKey,
-      'X-Goog-FieldMask': 'places.id,places.reviews',
+      'X-Goog-FieldMask': 'places.id,places.reviews,places.rating,places.userRatingCount',
+      Referer: 'https://cardmapjp.vercel.app/',
     },
     body: JSON.stringify(body),
   });
@@ -69,7 +71,7 @@ async function searchPlaceAndFetchReviews(
     return { placeId: null, reviews: [] };
   }
 
-  return { placeId: place.id, reviews: place.reviews ?? [] };
+  return { placeId: place.id, reviews: place.reviews ?? [], rating: place.rating, userRatingCount: place.userRatingCount };
 }
 
 function transformReviews(placeReviews: PlaceReview[]) {
@@ -172,6 +174,8 @@ export async function POST(request: NextRequest) {
 async function fetchSingleShopReviews(supabase: any, shop: any, apiKey: string) {
   let placeId = shop.google_place_id;
   let placeReviews: PlaceReview[] = [];
+  let rating: number | undefined;
+  let userRatingCount: number | undefined;
 
   if (placeId) {
     // Direct fetch by place_id
@@ -180,6 +184,8 @@ async function fetchSingleShopReviews(supabase: any, shop: any, apiKey: string) 
       return { error: result.error, count: 0 };
     }
     placeReviews = result.reviews;
+    rating = result.rating;
+    userRatingCount = result.userRatingCount;
   } else {
     // Search by name + location
     const result = await searchPlaceAndFetchReviews(
@@ -193,11 +199,21 @@ async function fetchSingleShopReviews(supabase: any, shop: any, apiKey: string) 
     }
     placeId = result.placeId;
     placeReviews = result.reviews;
+    rating = result.rating;
+    userRatingCount = result.userRatingCount;
 
     // Save discovered place_id
     if (placeId) {
       await supabase.from('shops').update({ google_place_id: placeId }).eq('id', shop.id);
     }
+  }
+
+  // Update shop rating info
+  if (rating !== undefined || userRatingCount !== undefined) {
+    const updateData: Record<string, number> = {};
+    if (rating !== undefined) updateData.google_rating = rating;
+    if (userRatingCount !== undefined) updateData.google_review_count = userRatingCount;
+    await supabase.from('shops').update(updateData).eq('id', shop.id);
   }
 
   if (!placeReviews.length) {
