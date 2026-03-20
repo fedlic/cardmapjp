@@ -10,6 +10,7 @@ export default function FetchReviewsButton() {
     skipped?: number;
     success?: number;
     failed?: number;
+    results?: { name: string; count: number; error?: string }[];
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,6 +63,24 @@ export default function FetchReviewsButton() {
           <p className="text-gray-500">
             Processed {result.processed} / {result.total} total shops
           </p>
+          {result.results && result.failed && result.failed > 0 && (
+            <details className="mt-2">
+              <summary className="cursor-pointer text-red-600">Show failed shops ({result.failed})</summary>
+              <div className="mt-1 max-h-60 overflow-y-auto bg-red-50 rounded p-2 space-y-1">
+                {result.results
+                  .filter((r) => r.error)
+                  .slice(0, 20)
+                  .map((r, i) => (
+                    <p key={i} className="text-xs text-red-700">
+                      {r.name}: {r.error}
+                    </p>
+                  ))}
+                {result.failed > 20 && (
+                  <p className="text-xs text-red-500">...and {result.failed - 20} more</p>
+                )}
+              </div>
+            </details>
+          )}
         </div>
       )}
 
