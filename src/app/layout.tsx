@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import AuthButton from "@/components/AuthButton";
+import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,6 +19,21 @@ export const metadata: Metadata = {
   title: "CardMapJP — Pokemon Card Shop Finder in Japan",
   description:
     "Find the best Pokemon card shops in Akihabara and across Japan. Real-time inventory, English support info, and visitor tips for foreign collectors.",
+  manifest: "/manifest.json",
+  themeColor: "#E3350D",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "CardMapJP",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
   verification: {
     google: "DcP8asRDyzENMw-VEHqueaMAq_K4X6YyzgeIdGQF0QA",
   },
@@ -55,6 +71,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <main>{children}</main>
+        <ServiceWorkerRegistrar />
       </body>
     </html>
   );
