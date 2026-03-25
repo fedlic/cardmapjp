@@ -18,7 +18,8 @@ Find the best Pokemon card shops in Akihabara and across Japan with real-time in
 
 ### Shop Directory
 - Searchable sidebar with real-time filtering by shop name
-- Filter badges: English Staff, Beginner Friendly, English Cards, Vintage, PSA Graded
+- Filter badges: Open Now, English Staff, PSA, BOX, Beginner
+- "Open Now" filter using real opening hours from Google Places API (JST timezone-aware, overnight hours supported)
 - Google rating display with review counts
 
 ### Shop Detail Pages (`/shops/[id]`)
@@ -238,6 +239,7 @@ Open [http://localhost:3000](http://localhost:3000)
 ## Roadmap
 
 ### Phase 2 - Enhanced Discovery
+- [x] "Open Now" filter with real-time opening hours (Google Places API)
 - [ ] Advanced search with multi-filter combinations (price range, category, payment method)
 - [ ] "Near me" GPS-based shop discovery
 - [ ] Shop comparison tool (compare inventory/prices side-by-side)

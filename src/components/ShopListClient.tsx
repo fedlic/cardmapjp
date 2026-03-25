@@ -23,12 +23,17 @@ const GoogleMapView = dynamic(() => import('@/components/GoogleMapView'), {
 
 function isShopOpenNow(hours: OpenHours | null): boolean | undefined {
   if (!hours) return undefined;
-  const now = new Date();
+  // Use Japan time since all shops are in Japan
+  const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
   const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   const today = days[now.getDay()];
   const slot = hours[today];
-  if (!slot) return false;
+  if (!slot || !slot.open || !slot.close) return false;
   const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  // Handle overnight hours (e.g., open: "18:00", close: "02:00")
+  if (slot.close < slot.open) {
+    return currentTime >= slot.open || currentTime <= slot.close;
+  }
   return currentTime >= slot.open && currentTime <= slot.close;
 }
 
