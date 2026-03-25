@@ -1,234 +1,124 @@
 # CardMapJP
 
-**The ultimate Pokemon card shop finder for foreign visitors to Japan.**
+The ultimate Pokemon card shop finder for foreign visitors to Japan.
+Find 284+ shops across 23 regions with real-time "Open Now" status, inventory info, English support details, and visitor tips.
 
-Find the best Pokemon card shops in Akihabara and across Japan with real-time inventory info, English support details, and visitor tips tailored for international collectors.
+日本全国のポケモンカードショップ検索サービス。
+284店舗以上、23エリア対応。リアルタイム営業中フィルター、在庫情報、英語対応情報、訪問者向けTipsを提供。
 
-**Live:** [cardmapjp.vercel.app](https://cardmapjp.vercel.app)
+**Live / 公開中:** [cardmapjp.vercel.app](https://cardmapjp.vercel.app)
 
 ---
 
-## Current Features (Phase 1)
+## Features / 機能一覧
 
-### Interactive Map
-- OpenStreetMap-based map powered by Leaflet/react-leaflet
-- 284 card shops across 23 regions covering all of Japan
-- Click markers to view shop summary, fly-to animation on selection
-- Color-coded markers (red = default, gold = selected)
+### Interactive Map / インタラクティブマップ
+- Google Maps with marker clustering / Google Maps + マーカークラスタリング
+- 284 card shops across 23 regions / 全国23エリア284店舗
+- Region-aware navigation from region pages / エリアページからのマップ連携
 
-### Shop Directory
-- Searchable sidebar with real-time filtering by shop name
-- Filter badges: Open Now, English Staff, PSA, BOX, Beginner
-- "Open Now" filter using real opening hours from Google Places API (JST timezone-aware, overnight hours supported)
-- Google rating display with review counts
+### Shop Directory / ショップ一覧
+- Filter: Open Now, EN Staff, PSA, BOX, Beginner / フィルター: 営業中、英語スタッフ、PSA、BOX、初心者向け
+- "Open Now" uses real opening hours from Google Places API (JST timezone-aware, overnight hours supported) / 「営業中」フィルターはGoogle Places APIから取得した実際の営業時間を使用（日本時間対応、深夜営業対応）
+- Distance-based sorting with geolocation / 位置情報による距離順ソート
+- Infinite scroll (20 items per page) / 無限スクロール（20件ずつ）
+- Google rating display / Google評価表示
 
-### Shop Detail Pages (`/shops/[id]`)
-- AI-generated summaries and visitor tips (English)
-- Inventory grid with 13 product categories and availability status
-- Payment method info (cash, Visa, Mastercard, IC cards)
-- English staff availability and schedule
-- ATM proximity notes
-- Google Maps directions link
-- User review system (with Supabase Auth)
+### Shop Detail Pages / ショップ詳細ページ (`/shops/[id]`)
+- AI-generated summaries and visitor tips (Claude API) / AI生成サマリーと訪問Tips（Claude API）
+- Inventory grid with 13 product categories / 13カテゴリの在庫グリッド
+- Google Reviews display with caching / Googleレビュー表示（キャッシュ付き）
+- Payment methods, English staff schedule, ATM info / 支払方法、英語スタッフスケジュール、ATM情報
+- Google Maps directions link / Google Mapsルート案内リンク
+- User review system (Google OAuth via Supabase Auth) / ユーザーレビュー機能（Google OAuth）
 
-### Inventory Categories
-| Category | Description |
-|----------|-------------|
-| Booster Boxes | Sealed booster boxes |
-| Sealed Packs | Individual booster packs |
-| Common Singles | Common/Uncommon single cards |
-| Rare Singles | Rare single cards |
-| SR / UR Cards | Super Rare / Ultra Rare |
-| SAR Cards | Special Art Rare |
-| PSA Graded | PSA graded cards |
-| BGS Graded | BGS/Beckett graded cards |
-| Vintage Packs | Vintage sealed packs |
-| Vintage Boxes | Vintage sealed boxes |
-| Oripa | Lottery packs (Japanese specialty) |
-| Decks | Pre-constructed / starter decks |
-| Accessories | Sleeves, playmats, deck boxes |
+### Regions / エリア (`/regions`)
 
-### Regions Page (`/regions`)
-23 regions across Japan, including:
-- **Tokyo**: Akihabara (78), Ikebukuro (12), Shibuya (10), Shinjuku (8), Nakano (8), Machida (6), Tachikawa (7)
-- **Kanto**: Yokohama (8), Omiya (7), Chiba (7)
-- **Kansai**: Nipponbashi/Osaka (20), Kyoto (11), Kobe (10)
-- **Chubu**: Osu/Nagoya (15), Niigata (6), Kanazawa (5)
-- **Kyushu/Okinawa**: Fukuoka (15), Kumamoto (6), Naha (6)
-- **Chugoku**: Hiroshima (10), Okayama (7)
-- **Tohoku/Hokkaido**: Sapporo (11), Sendai (11)
+23 regions across Japan / 日本全国23エリア:
+
+| Area | Regions / エリア |
+|------|-----------------|
+| Tokyo / 東京 | Akihabara (78), Ikebukuro (12), Shibuya (10), Shinjuku (8), Nakano (8), Tachikawa (7), Machida (6) |
+| Kanto / 関東 | Yokohama (8), Omiya (7), Chiba (7) |
+| Kansai / 関西 | Nipponbashi/Osaka (20), Kyoto (11), Kobe (10) |
+| Chubu / 中部 | Osu/Nagoya (15), Niigata (6), Kanazawa (5) |
+| Kyushu & Okinawa / 九州・沖縄 | Fukuoka (15), Kumamoto (6), Naha (6) |
+| Chugoku / 中国 | Hiroshima (10), Okayama (7) |
+| Tohoku & Hokkaido / 東北・北海道 | Sapporo (11), Sendai (11) |
 
 ### SEO
-- Dynamic `sitemap.xml` with all shop and region pages
-- `robots.txt` blocking `/api/` routes
-- JSON-LD structured data (Schema.org `Store`) on each shop detail page
-- OpenGraph meta tags on all pages
-- `/regions/akihabara` landing page with SEO article content
+- Dynamic sitemap.xml, robots.txt
+- JSON-LD structured data (Schema.org `Store`)
+- OpenGraph meta tags
+- SEO landing page for Akihabara / 秋葉原向けSEOランディングページ
 
-### Admin Dashboard (`/admin`)
-Password-protected management panel.
-
-| Page | Features |
-|------|----------|
-| `/admin/login` | Password authentication (env var `ADMIN_PASSWORD`) |
-| `/admin` | Stats: total/active shops, avg rating, inventory summary, recently updated |
-| `/admin/shops` | Shop CRUD: table with search, create/edit dialog (name, address, coords, features, hours), delete |
-| `/admin/inventory` | Shop selector → 13-category grid, availability/price/notes editing, bulk save |
-
-**Auth**: HMAC-SHA256 signed cookie, middleware-protected, 24h session.
+### Admin Dashboard / 管理画面 (`/admin`)
+- Shop CRUD (create, edit, delete) / ショップCRUD
+- Inventory management (13 categories) / 在庫管理
+- Member management, ban system / メンバー管理、BAN機能
+- Review moderation / レビュー管理
+- Google Reviews bulk fetch / Googleレビュー一括取得
+- HMAC-SHA256 cookie auth, 24h session / HMAC-SHA256認証
 
 ### API
-- `GET /api/shops` - List all shops (optimized columns, Cache-Control headers)
-  - Query params: `region_id`, `lat`, `lng`, `radius_km`
-  - PostGIS-powered radius search
-- `POST /api/shops/[id]/generate-summary` - Generate AI summary via Claude API
-- `GET/POST /api/admin/shops` - Admin shop CRUD
-- `PUT/DELETE /api/admin/shops/[id]` - Admin shop update/delete
-- `GET/PUT /api/admin/inventory` - Admin inventory management
+- `GET /api/shops` - Shop list with PostGIS radius search / PostGIS半径検索対応
+- `POST /api/shops/[id]/generate-summary` - AI summary generation / AIサマリー生成
+- Admin CRUD routes / 管理者用CRUDルート
 
 ---
 
-## Tech Stack
+## Tech Stack / 技術スタック
 
 | Layer | Technology |
 |-------|-----------|
 | Framework | Next.js 16 (App Router, TypeScript) |
 | UI | Tailwind CSS 4 + shadcn/ui |
-| Maps | Leaflet + react-leaflet + OpenStreetMap |
+| Maps | Google Maps API + @googlemaps/markerclusterer |
 | Database | Supabase (PostgreSQL + PostGIS) |
-| AI | Anthropic Claude API (shop summaries) |
-| Auth | Supabase Auth (for reviews) |
+| AI | Anthropic Claude API |
+| Auth | Supabase Auth (Google OAuth) |
 | Icons | Lucide React |
 | Deployment | Vercel |
 
 ---
 
-## Project Structure
+## Scripts / スクリプト
 
-```
-cardmapjp/
-├── src/
-│   ├── middleware.ts                    # Auth middleware for /admin/*
-│   ├── app/
-│   │   ├── page.tsx                    # Home (Server Component, 5min ISR)
-│   │   ├── layout.tsx                  # Root layout with header
-│   │   ├── sitemap.ts                  # Dynamic sitemap.xml
-│   │   ├── robots.ts                   # robots.txt
-│   │   ├── shops/[id]/page.tsx         # Shop detail (SSG, JSON-LD, SEO)
-│   │   ├── regions/
-│   │   │   ├── page.tsx               # Region selection
-│   │   │   └── akihabara/page.tsx     # Akihabara landing page (SEO)
-│   │   ├── admin/
-│   │   │   ├── layout.tsx             # Admin layout (sidenav)
-│   │   │   ├── login/page.tsx         # Login form
-│   │   │   ├── page.tsx               # Dashboard (stats)
-│   │   │   ├── shops/page.tsx         # Shop CRUD
-│   │   │   └── inventory/page.tsx     # Inventory management
-│   │   └── api/
-│   │       ├── shops/route.ts         # GET /api/shops
-│   │       ├── shops/[id]/generate-summary/route.ts
-│   │       └── admin/
-│   │           ├── login/route.ts     # POST login
-│   │           ├── logout/route.ts    # POST logout
-│   │           ├── shops/route.ts     # GET/POST shops
-│   │           ├── shops/[id]/route.ts # PUT/DELETE shop
-│   │           └── inventory/route.ts # GET/PUT inventory
-│   ├── components/
-│   │   ├── HomePageClient.tsx          # Client-side map + sidebar
-│   │   ├── ShopMap.tsx                 # Leaflet map with markers
-│   │   ├── ShopSidebar.tsx             # Search + filter + sort + list
-│   │   ├── ShopCard.tsx                # Shop card (React.memo)
-│   │   ├── ShopFilters.tsx             # Filter badge buttons
-│   │   ├── ShopDetail/
-│   │   │   ├── HeroSection.tsx         # Shop name, ratings, badges
-│   │   │   ├── AISummary.tsx           # AI summary + visitor tips
-│   │   │   ├── InventoryGrid.tsx       # Product categories grid
-│   │   │   ├── InfoSection.tsx         # Address, payment, hours, links
-│   │   │   └── ReviewList.tsx          # User reviews
-│   │   └── ui/                         # Base UI components
-│   ├── hooks/
-│   │   └── useDebounce.ts             # Debounce hook (200ms)
-│   ├── lib/
-│   │   ├── claude.ts                   # Claude API integration
-│   │   ├── google-maps.ts             # Map config constants
-│   │   ├── utils.ts                    # Utility functions
-│   │   └── supabase/
-│   │       ├── client.ts               # Browser Supabase client
-│   │       ├── server.ts               # Server Supabase client
-│   │       └── queries/
-│   │           ├── shops.ts            # Shop queries
-│   │           └── inventory.ts        # Inventory queries
-│   └── types/
-│       └── index.ts                    # All TypeScript types
-├── supabase/
-│   ├── migrations/
-│   │   ├── 001_initial.sql             # Core schema (6 tables)
-│   │   └── 002_views_and_functions.sql # PostGIS views & functions
-│   ├── seed.sql                        # Original 10 shops (Akihabara)
-│   ├── seed_additional.sql             # 68 additional Akihabara shops
-│   ├── seed_osaka.sql                  # 20 Nipponbashi (Osaka) shops
-│   ├── seed_nagoya.sql                 # 15 Osu (Nagoya) shops
-│   ├── seed_fukuoka.sql                # 15 Tenjin/Hakata (Fukuoka) shops
-│   ├── enrich_original_10.sql          # Enriched inventory for original 10
-│   └── enrich_additional_part[1-3].sql # Inventory for all 68 shops
-└── .env.local                          # Environment variables
-```
+| Script | Description / 説明 |
+|--------|-------------------|
+| `scripts/fetch-open-hours.mjs` | Fetch opening hours from Google Places API for all shops / 全店舗の営業時間をGoogle Places APIから取得 |
 
 ---
 
-## Database Schema
+## Getting Started / セットアップ
 
-### Tables
-- **regions** - Shopping districts (Akihabara, Nipponbashi, etc.)
-- **buildings** - Physical buildings with PostGIS locations
-- **shops** - Core shop data (47 fields including location, hours, payment, English support, inventory flags, AI content)
-- **shop_inventory** - Product categories with availability and pricing (unique per shop+category)
-- **google_reviews_cache** - Cached Google Places reviews
-- **reviews** - User-submitted reviews with ratings
-
-### Key Features
-- PostGIS `geography` type for accurate distance calculations
-- `shops_with_coords` view for easy lat/lng access
-- `shops_within_radius()` function for geo-queries
-- Row Level Security (RLS) policies on all tables
-- GiST indexes for geographic queries
-
----
-
-## Getting Started
-
-### Prerequisites
+### Prerequisites / 前提条件
 - Node.js 18+
-- Supabase account
+- Supabase account / Supabaseアカウント
 
 ### Setup
 
 ```bash
-# Clone
 git clone https://github.com/fedlic/cardmapjp.git
 cd cardmapjp
-
-# Install
 npm install
 
-# Environment variables
+# Environment variables / 環境変数
 cp .env.local.example .env.local
-# Fill in your Supabase URL, anon key, service role key, and admin password
-# ADMIN_PASSWORD=your-admin-password
+# Fill in Supabase URL, keys, Google Maps API key, admin password
+# Supabase URL、キー、Google Maps APIキー、管理者パスワードを設定
 
-# Run migrations (requires Supabase CLI)
+# Run migrations / マイグレーション実行
 npx supabase db query -f supabase/migrations/001_initial.sql --linked
 npx supabase db query -f supabase/migrations/002_views_and_functions.sql --linked
 
-# Seed data
+# Seed data / データ投入
 npx supabase db query -f supabase/seed.sql --linked
-npx supabase db query -f supabase/seed_additional.sql --linked
-npx supabase db query -f supabase/enrich_original_10.sql --linked
-npx supabase db query -f supabase/enrich_additional_part1.sql --linked
-npx supabase db query -f supabase/enrich_additional_part2.sql --linked
-npx supabase db query -f supabase/enrich_additional_part3.sql --linked
 
-# Start dev server
+# Fetch opening hours / 営業時間取得
+node scripts/fetch-open-hours.mjs
+
+# Start dev server / 開発サーバー起動
 npm run dev
 ```
 
@@ -236,91 +126,50 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## Roadmap
+## Database Schema / データベース構成
 
-### Phase 2 - Enhanced Discovery
-- [x] "Open Now" filter with real-time opening hours (Google Places API)
-- [ ] Advanced search with multi-filter combinations (price range, category, payment method)
-- [ ] "Near me" GPS-based shop discovery
-- [ ] Shop comparison tool (compare inventory/prices side-by-side)
-- [ ] Bookmark / favorites system (localStorage or auth-based)
-- [x] Sort shops by distance, rating, or inventory richness
+| Table / テーブル | Description / 説明 |
+|-----------------|-------------------|
+| regions | Shopping districts / ショッピングエリア |
+| buildings | Physical buildings with PostGIS locations / 建物（PostGIS） |
+| shops | Core shop data (47 fields) / ショップデータ（47フィールド） |
+| shop_inventory | Product categories with availability / 商品カテゴリと在庫状況 |
+| google_reviews_cache | Cached Google Places reviews / Googleレビューキャッシュ |
+| reviews | User-submitted reviews / ユーザーレビュー |
+| banned_users | Banned user list / BANユーザーリスト |
 
-### Phase 3 - Community & Content
-- [ ] User authentication (Google / X login via Supabase Auth)
-- [ ] User review submission with photo uploads
-- [ ] "I visited" check-in system with badges
-- [ ] Community-contributed inventory updates (crowd-sourced stock info)
-- [x] Shop owner claim & management portal (admin dashboard)
+PostGIS `geography` type, `shops_with_coords` view, `shops_within_radius()` function, RLS policies, GiST indexes.
 
-### Phase 4 - Multi-Region Expansion
-- [ ] Nipponbashi (Osaka) - Den Den Town card shops
-- [ ] Ikebukuro (Tokyo) - Otome Road & surroundings
-- [ ] Shinjuku (Tokyo) - card shops near station
-- [ ] Shibuya (Tokyo) - card shops
-- [ ] Osu (Nagoya) - Osu Shopping Street
-- [ ] Teramachi (Kyoto) - Teramachi Street shops
-- [ ] Tenjin (Fukuoka) - Tenjin area shops
-- [ ] Region-specific curated walking routes
+---
 
-### Phase 5 - Smart Features
-- [ ] Real-time inventory tracking via shop partnerships
-- [ ] Price trend charts (track card values over time)
-- [ ] "Deal finder" - alerts when specific cards are in stock nearby
-- [ ] Multi-language support (Japanese, Chinese, Korean, Thai)
-- [ ] PWA with offline map support for use without data
-- [ ] Integration with card price databases (e.g., Price Charting)
+## Roadmap / ロードマップ
 
-### Phase 6 - Platform
-- [ ] Mobile app (React Native or Expo)
-- [ ] Shop partnership program (verified shops, promoted listings)
-- [ ] Affiliate links for online card purchases
-- [ ] Travel itinerary builder ("Card shopping route for 1 day in Akihabara")
-- [ ] Integration with Google Maps / Apple Maps for turn-by-turn navigation
+### Done / 完了
+- [x] 284 shops across 23 regions / 全国23エリア284店舗
+- [x] "Open Now" filter with Google Places API opening hours / Google Places API営業時間による「営業中」フィルター
+- [x] Google Maps with marker clustering / Google Maps + クラスタリング
+- [x] Distance-based sorting / 距離順ソート
+- [x] AI-generated shop summaries (Claude API) / AI生成ショップサマリー
+- [x] Google Reviews display / Googleレビュー表示
+- [x] User auth (Google OAuth) + review system / ユーザー認証 + レビュー機能
+- [x] Admin dashboard (shops, inventory, members, reviews) / 管理画面
+- [x] SEO (sitemap, JSON-LD, OpenGraph) / SEO対策
 
-### Infrastructure & Quality
-- [ ] Automated shop data verification (web scraping + AI validation)
-- [ ] Performance monitoring and error tracking
-- [x] SEO optimization (meta tags, structured data, sitemap)
-- [ ] Accessibility audit (WCAG 2.1 AA compliance)
+### Planned / 予定
+- [ ] Advanced multi-filter search / 複合フィルター検索
+- [ ] Bookmark / favorites / お気に入り機能
+- [ ] Photo uploads for reviews / レビュー写真アップロード
+- [ ] "I visited" check-in badges / 訪問チェックインバッジ
+- [ ] Multi-language (JA, ZH, KO, TH) / 多言語対応
+- [ ] PWA with offline map / オフラインマップPWA
+- [ ] Price trend charts / 価格推移チャート
+- [ ] Mobile app / モバイルアプリ
+- [ ] CI/CD with GitHub Actions
 - [ ] E2E tests with Playwright
-- [ ] CI/CD pipeline with GitHub Actions
 
 ---
 
-## Data Coverage
-
-**284 shops across 23 regions nationwide**
-
-| Region | Shops | Status |
-|--------|-------|--------|
-| Akihabara (Tokyo) | 78 | Live |
-| Nipponbashi (Osaka) | 20 | Live |
-| Osu (Nagoya) | 15 | Live |
-| Tenjin / Hakata (Fukuoka) | 15 | Live |
-| Ikebukuro (Tokyo) | 12 | Live |
-| Sapporo (Hokkaido) | 11 | Live |
-| Sendai (Miyagi) | 11 | Live |
-| Teramachi / Kawaramachi (Kyoto) | 11 | Live |
-| Hiroshima | 10 | Live |
-| Sannomiya (Kobe) | 10 | Live |
-| Shibuya (Tokyo) | 10 | Live |
-| Nakano (Tokyo) | 8 | Live |
-| Shinjuku (Tokyo) | 8 | Live |
-| Yokohama (Kanagawa) | 8 | Live |
-| Chiba | 7 | Live |
-| Okayama | 7 | Live |
-| Omiya (Saitama) | 7 | Live |
-| Tachikawa (Tokyo) | 7 | Live |
-| Kumamoto | 6 | Live |
-| Machida (Tokyo) | 6 | Live |
-| Naha (Okinawa) | 6 | Live |
-| Niigata | 6 | Live |
-| Kanazawa (Ishikawa) | 5 | Live |
-
----
-
-## License
+## License / ライセンス
 
 Private project. All rights reserved.
 
