@@ -12,6 +12,10 @@ import { haversineKm } from '@/lib/geo';
 import { REGION_CENTERS } from '@/lib/regions';
 import type { Shop, OpenHours } from '@/types';
 
+function normalizeForSearch(str: string): string {
+  return str.toLowerCase().replace(/[\s\u3000]+/g, '');
+}
+
 const GoogleMapView = dynamic(() => import('@/components/GoogleMapView'), {
   ssr: false,
   loading: () => (
@@ -44,7 +48,17 @@ interface ShopListClientProps {
 export default function ShopListClient({ shops }: ShopListClientProps) {
   const searchParams = useSearchParams();
   const [showMap, setShowMap] = useState(true);
-  const { position: userLocation } = useGeolocation();
+  const [searchQuery, setSearchQuery] = useState('');
+  const { position: userLocation, status: geoStatus, requestLocation, clearLocation } = useGeolocation();
+  const nearMeActive = userLocation !== null;
+
+  const handleNearMeToggle = useCallback(() => {
+    if (nearMeActive) {
+      clearLocation();
+    } else {
+      requestLocation();
+    }
+  }, [nearMeActive, clearLocation, requestLocation]);
 
   const regionParam = searchParams.get('region');
   const regionCenter = useMemo(() => {
@@ -56,6 +70,17 @@ export default function ShopListClient({ shops }: ShopListClientProps) {
 
   const filtered = useMemo(() => {
     let list = shops;
+
+    // Text search across name_ja, name_en, and address
+    if (searchQuery.trim()) {
+      const q = normalizeForSearch(searchQuery);
+      list = list.filter((s) => {
+        const nameJp = s.name_jp ? normalizeForSearch(s.name_jp) : '';
+        const nameEn = s.name_en ? normalizeForSearch(s.name_en) : '';
+        const address = s.address_jp ? normalizeForSearch(s.address_jp) : '';
+        return nameJp.includes(q) || nameEn.includes(q) || address.includes(q);
+      });
+    }
 
     if (activeFilters.has('open')) {
       list = list.filter((s) => isShopOpenNow(s.open_hours ?? null) === true);
@@ -84,7 +109,7 @@ export default function ShopListClient({ shops }: ShopListClientProps) {
         ? haversineKm(userLocation.lat, userLocation.lng, shop.location.lat, shop.location.lng)
         : null,
     }));
-  }, [shops, activeFilters, regionParam, userLocation]);
+  }, [shops, activeFilters, regionParam, userLocation, searchQuery]);
 
   const sorted = useMemo(() => {
     const items = [...filtered];
@@ -105,7 +130,13 @@ export default function ShopListClient({ shops }: ShopListClientProps) {
     <div className="min-h-[calc(100vh-48px)]">
       {/* Sticky filter bar */}
       <div className="sticky top-0 z-30">
-        <FilterBar />
+        <FilterBar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          nearMeActive={nearMeActive}
+          nearMeStatus={geoStatus}
+          onNearMeToggle={handleNearMeToggle}
+        />
       </div>
 
       {/* Map toggle + map area */}
