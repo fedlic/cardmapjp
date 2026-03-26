@@ -7,6 +7,7 @@ Find 284+ shops across 23 regions with real-time "Open Now" status, inventory in
 284店舗以上、23エリア対応。リアルタイム営業中フィルター、在庫情報、英語対応情報、訪問者向けTipsを提供。
 
 **Live / 公開中:** [cardmapjp.vercel.app](https://cardmapjp.vercel.app)
+**Twitter / X:** [@cardmapjp](https://x.com/cardmapjp)
 
 ---
 
