@@ -23,15 +23,16 @@ const redIcon = L.icon({
 });
 
 export default function GoogleMapView({ shops, initialCenter, initialZoom }: GoogleMapViewProps) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
+  const prevCenterRef = useRef<string>('');
 
   // マップ初期化（1回だけ）
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
+    if (!containerRef.current || mapRef.current) return;
 
-    const map = L.map(mapRef.current, {
+    const map = L.map(containerRef.current, {
       center: [DEFAULT_CENTER.lat, DEFAULT_CENTER.lng],
       zoom: DEFAULT_ZOOM,
       zoomControl: true,
@@ -43,50 +44,47 @@ export default function GoogleMapView({ shops, initialCenter, initialZoom }: Goo
     }).addTo(map);
 
     markersRef.current = L.layerGroup().addTo(map);
-    mapInstanceRef.current = map;
+    mapRef.current = map;
 
     return () => {
       map.remove();
-      mapInstanceRef.current = null;
+      mapRef.current = null;
       markersRef.current = null;
     };
   }, []);
 
-  // センター・ズーム更新
+  // マーカー更新 + ビュー更新
   useEffect(() => {
-    const map = mapInstanceRef.current;
-    if (!map || !initialCenter) return;
-    map.setView([initialCenter.lat, initialCenter.lng], initialZoom ?? 14);
-  }, [initialCenter, initialZoom]);
-
-  // マーカー更新
-  useEffect(() => {
-    const map = mapInstanceRef.current;
+    const map = mapRef.current;
     const markerLayer = markersRef.current;
     if (!map || !markerLayer) return;
 
+    // マーカーを再描画
     markerLayer.clearLayers();
-
     shops.forEach((shop) => {
       const marker = L.marker([shop.location.lat, shop.location.lng], { icon: redIcon });
-
-      const popupContent = `
+      marker.bindPopup(`
         <div style="min-width:160px;font-family:sans-serif;">
           <div style="font-weight:700;font-size:14px;margin-bottom:2px;">${escapeHtml(shop.name_en)}</div>
           <div style="font-size:12px;color:#6b7280;">${escapeHtml(shop.name_jp ?? '')}</div>
           ${shop.google_rating ? `<div style="font-size:12px;margin-top:4px;"><span style="color:#FFCB05;">&#9733;</span> ${shop.google_rating}</div>` : ''}
           <a href="/shops/${shop.id}" style="font-size:12px;color:#E3350D;text-decoration:none;display:inline-block;margin-top:6px;font-weight:500;">View Details &rarr;</a>
         </div>
-      `;
-
-      marker.bindPopup(popupContent);
+      `);
       markerLayer.addLayer(marker);
     });
-  }, [shops]);
+
+    // ビュー更新（centerが変わった場合のみ）
+    const centerKey = initialCenter ? `${initialCenter.lat},${initialCenter.lng}` : '';
+    if (centerKey && centerKey !== prevCenterRef.current) {
+      map.setView([initialCenter!.lat, initialCenter!.lng], initialZoom ?? 15);
+      prevCenterRef.current = centerKey;
+    }
+  }, [shops, initialCenter, initialZoom]);
 
   return (
     <div className="relative w-full h-full overflow-hidden">
-      <div ref={mapRef} className="w-full h-full" />
+      <div ref={containerRef} className="w-full h-full" />
     </div>
   );
 }
