@@ -10,6 +10,7 @@ interface GoogleMapViewProps {
   shops: Shop[];
   initialCenter?: { lat: number; lng: number } | null;
   initialZoom?: number;
+  userLocation?: { lat: number; lng: number } | null;
 }
 
 const redIcon = L.icon({
@@ -22,7 +23,21 @@ const redIcon = L.icon({
   shadowSize: [41, 41],
 });
 
-export default function GoogleMapView({ shops, initialCenter, initialZoom }: GoogleMapViewProps) {
+// 現在地マーカー（青い丸）
+const userIcon = L.divIcon({
+  className: '',
+  html: `
+    <div style="position:relative;width:20px;height:20px;">
+      <div style="position:absolute;inset:0;background:#4285F4;border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>
+      <div style="position:absolute;inset:-8px;background:rgba(66,133,244,0.2);border-radius:50%;animation:pulse 2s infinite;"></div>
+    </div>
+    <style>@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.8);opacity:0}}</style>
+  `,
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+});
+
+export default function GoogleMapView({ shops, initialCenter, initialZoom, userLocation }: GoogleMapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -42,6 +57,14 @@ export default function GoogleMapView({ shops, initialCenter, initialZoom }: Goo
       maxZoom: 19,
     }).addTo(map);
 
+    // 現在地マーカー
+    if (userLocation) {
+      L.marker([userLocation.lat, userLocation.lng], { icon: userIcon, zIndexOffset: 1000 })
+        .bindPopup('<div style="font-family:sans-serif;font-weight:700;font-size:13px;">You are here</div>')
+        .addTo(map);
+    }
+
+    // ショップマーカー
     shops.forEach((shop) => {
       const marker = L.marker([shop.location.lat, shop.location.lng], { icon: redIcon });
       marker.bindPopup(`
@@ -58,7 +81,7 @@ export default function GoogleMapView({ shops, initialCenter, initialZoom }: Goo
     return () => {
       map.remove();
     };
-  }, [shops, initialCenter, initialZoom]);
+  }, [shops, initialCenter, initialZoom, userLocation]);
 
   return (
     <div className="relative w-full h-full overflow-hidden">

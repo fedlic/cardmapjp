@@ -147,7 +147,8 @@ export default function ShopListClient({ shops }: ShopListClientProps) {
             key={userLocation ? `${userLocation.lat},${userLocation.lng}` : regionCenter ? `region` : 'default'}
             shops={filtered.map((f) => f.shop)}
             initialCenter={userLocation ?? regionCenter}
-            initialZoom={userLocation ? 15 : regionCenter ? 15 : undefined}
+            initialZoom={userLocation ? 17 : regionCenter ? 15 : undefined}
+            userLocation={userLocation}
           />
           <button
             onClick={toggleMap}
