@@ -26,7 +26,6 @@ export default function GoogleMapView({ shops, initialCenter, initialZoom }: Goo
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
-  const prevCenterRef = useRef<string>('');
 
   // マップ初期化（1回だけ）
   useEffect(() => {
@@ -53,13 +52,20 @@ export default function GoogleMapView({ shops, initialCenter, initialZoom }: Goo
     };
   }, []);
 
-  // マーカー更新 + ビュー更新
+  // ビュー更新（center/zoomが変わったら）
+  const centerLat = initialCenter?.lat;
+  const centerLng = initialCenter?.lng;
   useEffect(() => {
     const map = mapRef.current;
-    const markerLayer = markersRef.current;
-    if (!map || !markerLayer) return;
+    if (!map || centerLat == null || centerLng == null) return;
+    map.setView([centerLat, centerLng], initialZoom ?? 15);
+  }, [centerLat, centerLng, initialZoom]);
 
-    // マーカーを再描画
+  // マーカー更新
+  useEffect(() => {
+    const markerLayer = markersRef.current;
+    if (!markerLayer) return;
+
     markerLayer.clearLayers();
     shops.forEach((shop) => {
       const marker = L.marker([shop.location.lat, shop.location.lng], { icon: redIcon });
@@ -73,14 +79,7 @@ export default function GoogleMapView({ shops, initialCenter, initialZoom }: Goo
       `);
       markerLayer.addLayer(marker);
     });
-
-    // ビュー更新（centerが変わった場合のみ）
-    const centerKey = initialCenter ? `${initialCenter.lat},${initialCenter.lng}` : '';
-    if (centerKey && centerKey !== prevCenterRef.current) {
-      map.setView([initialCenter!.lat, initialCenter!.lng], initialZoom ?? 15);
-      prevCenterRef.current = centerKey;
-    }
-  }, [shops, initialCenter, initialZoom]);
+  }, [shops]);
 
   return (
     <div className="relative w-full h-full overflow-hidden">
