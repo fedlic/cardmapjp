@@ -24,16 +24,16 @@ const redIcon = L.icon({
 
 export default function GoogleMapView({ shops, initialCenter, initialZoom }: GoogleMapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<L.LayerGroup | null>(null);
 
-  // マップ初期化（1回だけ）
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
+    if (!containerRef.current) return;
+
+    const center = initialCenter ?? DEFAULT_CENTER;
+    const zoom = initialZoom ?? DEFAULT_ZOOM;
 
     const map = L.map(containerRef.current, {
-      center: [DEFAULT_CENTER.lat, DEFAULT_CENTER.lng],
-      zoom: DEFAULT_ZOOM,
+      center: [center.lat, center.lng],
+      zoom,
       zoomControl: true,
     });
 
@@ -42,31 +42,6 @@ export default function GoogleMapView({ shops, initialCenter, initialZoom }: Goo
       maxZoom: 19,
     }).addTo(map);
 
-    markersRef.current = L.layerGroup().addTo(map);
-    mapRef.current = map;
-
-    return () => {
-      map.remove();
-      mapRef.current = null;
-      markersRef.current = null;
-    };
-  }, []);
-
-  // ビュー更新（center/zoomが変わったら）
-  const centerLat = initialCenter?.lat;
-  const centerLng = initialCenter?.lng;
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || centerLat == null || centerLng == null) return;
-    map.setView([centerLat, centerLng], initialZoom ?? 15);
-  }, [centerLat, centerLng, initialZoom]);
-
-  // マーカー更新
-  useEffect(() => {
-    const markerLayer = markersRef.current;
-    if (!markerLayer) return;
-
-    markerLayer.clearLayers();
     shops.forEach((shop) => {
       const marker = L.marker([shop.location.lat, shop.location.lng], { icon: redIcon });
       marker.bindPopup(`
@@ -77,9 +52,13 @@ export default function GoogleMapView({ shops, initialCenter, initialZoom }: Goo
           <a href="/shops/${shop.id}" style="font-size:12px;color:#E3350D;text-decoration:none;display:inline-block;margin-top:6px;font-weight:500;">View Details &rarr;</a>
         </div>
       `);
-      markerLayer.addLayer(marker);
+      marker.addTo(map);
     });
-  }, [shops]);
+
+    return () => {
+      map.remove();
+    };
+  }, [shops, initialCenter, initialZoom]);
 
   return (
     <div className="relative w-full h-full overflow-hidden">
