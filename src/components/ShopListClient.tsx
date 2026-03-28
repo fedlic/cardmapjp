@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import { MapPin, X } from 'lucide-react';
 import FilterBar, { getActiveFilters } from '@/components/FilterBar';
 import ShopCard from '@/components/ShopCard';
+import AdBanner from '@/components/AdBanner';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { haversineKm } from '@/lib/geo';
@@ -178,13 +179,19 @@ export default function ShopListClient({ shops }: ShopListClientProps) {
           </p>
         ) : (
           <>
-            {visibleItems.map(({ shop, isOpen, distance }) => (
-              <ShopCard
-                key={shop.id}
-                shop={shop}
-                isOpen={isOpen ?? undefined}
-                distance={distance}
-              />
+            {visibleItems.map(({ shop, isOpen, distance }, index) => (
+              <div key={shop.id}>
+                <ShopCard
+                  shop={shop}
+                  isOpen={isOpen ?? undefined}
+                  distance={distance}
+                />
+                {(index === 4 || index === 14) && (
+                  <div className="my-3">
+                    <AdBanner slot="6624319605" format="auto" />
+                  </div>
+                )}
+              </div>
             ))}
             {hasMore && (
               <div ref={sentinelRef} className="flex justify-center py-4">

@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createServerClient } from '@/lib/supabase/server';
 import { ALL_REGION_SLUGS, getRegionConfig } from '@/lib/regions';
+import AdBanner from '@/components/AdBanner';
 import type { ShopRow } from '@/types';
 
 export const revalidate = 3600;
@@ -126,6 +127,9 @@ export default async function RegionPage({ params }: PageProps) {
               ))}
             </div>
           </article>
+
+          {/* Ad */}
+          <AdBanner slot="3579353861" format="auto" className="mb-8" />
 
           {/* Shop listing */}
           <h2 className="text-xl font-bold text-gray-900 mb-4">All {shops.length} Shops in {config.name_en}</h2>

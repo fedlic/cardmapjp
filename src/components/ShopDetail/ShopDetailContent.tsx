@@ -3,6 +3,7 @@ import AISummary from './AISummary';
 import InventoryGrid from './InventoryGrid';
 import InfoSection from './InfoSection';
 import ReviewList from './ReviewList';
+import AdBanner from '@/components/AdBanner';
 import type { Shop, ShopInventory, Review, GoogleReview } from '@/types';
 
 interface ShopDetailContentProps {
@@ -21,6 +22,7 @@ export default function ShopDetailContent({ shop, inventory, reviews, googleRevi
         <AISummary summary={shop.ai_summary} tips={shop.visitor_tips} />
         {inventory.length > 0 && <InventoryGrid inventory={inventory} />}
         <InfoSection shop={shop} />
+        <AdBanner slot="2671398626" format="auto" className="my-4" />
         <ReviewList reviews={reviews} shopId={shop.id} googleReviews={googleReviews} />
       </div>
 
