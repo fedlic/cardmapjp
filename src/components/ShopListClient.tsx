@@ -145,8 +145,8 @@ export default function ShopListClient({ shops }: ShopListClientProps) {
         <div className="h-[40vh] relative">
           <GoogleMapView
             shops={filtered.map((f) => f.shop)}
-            initialCenter={regionCenter}
-            initialZoom={regionCenter ? 15 : undefined}
+            initialCenter={userLocation ?? regionCenter}
+            initialZoom={userLocation ? 14 : regionCenter ? 15 : undefined}
           />
           <button
             onClick={toggleMap}

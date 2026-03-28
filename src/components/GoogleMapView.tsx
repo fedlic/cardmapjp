@@ -31,12 +31,9 @@ export default function GoogleMapView({ shops, initialCenter, initialZoom }: Goo
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
 
-    const center = initialCenter ?? DEFAULT_CENTER;
-    const zoom = initialZoom ?? DEFAULT_ZOOM;
-
     const map = L.map(mapRef.current, {
-      center: [center.lat, center.lng],
-      zoom,
+      center: [DEFAULT_CENTER.lat, DEFAULT_CENTER.lng],
+      zoom: DEFAULT_ZOOM,
       zoomControl: true,
     });
 
@@ -53,9 +50,16 @@ export default function GoogleMapView({ shops, initialCenter, initialZoom }: Goo
       mapInstanceRef.current = null;
       markersRef.current = null;
     };
+  }, []);
+
+  // センター・ズーム更新
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !initialCenter) return;
+    map.setView([initialCenter.lat, initialCenter.lng], initialZoom ?? 14);
   }, [initialCenter, initialZoom]);
 
-  // マーカー更新（shopsが変わるたびに）
+  // マーカー更新
   useEffect(() => {
     const map = mapInstanceRef.current;
     const markerLayer = markersRef.current;
@@ -78,12 +82,7 @@ export default function GoogleMapView({ shops, initialCenter, initialZoom }: Goo
       marker.bindPopup(popupContent);
       markerLayer.addLayer(marker);
     });
-
-    // initialCenterがある場合（リージョンページ等）はそこにフォーカス
-    if (initialCenter) {
-      map.setView([initialCenter.lat, initialCenter.lng], initialZoom ?? 15);
-    }
-  }, [shops, initialCenter, initialZoom]);
+  }, [shops]);
 
   return (
     <div className="relative w-full h-full overflow-hidden">
