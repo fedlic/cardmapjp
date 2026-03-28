@@ -14,9 +14,10 @@ Find 284+ shops across 23 regions with real-time "Open Now" status, inventory in
 ## Features / 機能一覧
 
 ### Interactive Map / インタラクティブマップ
-- Google Maps with marker clustering / Google Maps + マーカークラスタリング
+- Leaflet + OpenStreetMap (completely free) / Leaflet + OpenStreetMap（完全無料）
 - 284 card shops across 23 regions / 全国23エリア284店舗
 - Region-aware navigation from region pages / エリアページからのマップ連携
+- Blue pulsing marker for user's current location / 現在地を示す青パルスマーカー
 
 ### Shop Directory / ショップ一覧
 - Filter: Open Now, EN Staff, PSA, BOX, Beginner / フィルター: 営業中、英語スタッフ、PSA、BOX、初心者向け
@@ -98,7 +99,7 @@ Find 284+ shops across 23 regions with real-time "Open Now" status, inventory in
 |-------|-----------|
 | Framework | Next.js 16 (App Router, TypeScript) |
 | UI | Tailwind CSS 4 + shadcn/ui |
-| Maps | Google Maps API + @googlemaps/markerclusterer |
+| Maps | Leaflet + OpenStreetMap (free) |
 | Database | Supabase (PostgreSQL + PostGIS) |
 | AI | Anthropic Claude API |
 | Auth | Supabase Auth (Google OAuth) |
@@ -175,8 +176,8 @@ PostGIS `geography` type, `shops_with_coords` view, `shops_within_radius()` func
 ### Done / 完了
 - [x] 284 shops across 23 regions / 全国23エリア284店舗
 - [x] "Open Now" filter with Google Places API opening hours / Google Places API営業時間による「営業中」フィルター
-- [x] Google Maps with marker clustering / Google Maps + クラスタリング
-- [x] Text search + "Near Me" geolocation sorting / テキスト検索 + 近くのショップ
+- [x] Leaflet + OpenStreetMap interactive map / Leaflet + OpenStreetMapインタラクティブマップ
+- [x] Text search + "Near Me" with blue pulsing location marker / テキスト検索 + 青パルスマーカー付きNear Me
 - [x] Distance-based sorting / 距離順ソート
 - [x] AI-generated shop summaries (Claude API) / AI生成ショップサマリー
 - [x] Google Reviews display / Googleレビュー表示
@@ -206,6 +207,8 @@ PostGIS `geography` type, `shops_with_coords` view, `shops_within_radius()` func
 ## Changelog / 更新履歴
 
 ### 2026-03-28
+- Replaced Google Maps with Leaflet + OpenStreetMap (free, saves ¥23k/month) / Google MapsをLeaflet + OpenStreetMapに置き換え（無料化）
+- "Near Me" map zoom to user location (zoom 17) with blue pulsing marker / Near Meで現在地にズーム + 青パルスマーカー
 - Google AdSense ads on shop list, detail, and region pages / AdSense広告をショップ一覧・詳細・エリアページに配置
 - ads.txt for AdSense verification / AdSense認証用ads.txt設置
 - Automated daily X/Twitter posting via Vercel Cron / Vercel Cronによる毎日自動X投稿
