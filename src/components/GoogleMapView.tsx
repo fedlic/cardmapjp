@@ -12,17 +12,6 @@ interface GoogleMapViewProps {
   initialZoom?: number;
 }
 
-// Leafletのデフォルトアイコンパスを修正
-const defaultIcon = L.icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-
 const redIcon = L.icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
   iconRetinaUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
@@ -36,7 +25,9 @@ const redIcon = L.icon({
 export default function GoogleMapView({ shops, initialCenter, initialZoom }: GoogleMapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.LayerGroup | null>(null);
 
+  // マップ初期化（1回だけ）
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
 
@@ -54,9 +45,26 @@ export default function GoogleMapView({ shops, initialCenter, initialZoom }: Goo
       maxZoom: 19,
     }).addTo(map);
 
-    // マーカーを追加
+    markersRef.current = L.layerGroup().addTo(map);
+    mapInstanceRef.current = map;
+
+    return () => {
+      map.remove();
+      mapInstanceRef.current = null;
+      markersRef.current = null;
+    };
+  }, [initialCenter, initialZoom]);
+
+  // マーカー更新（shopsが変わるたびに）
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    const markerLayer = markersRef.current;
+    if (!map || !markerLayer) return;
+
+    markerLayer.clearLayers();
+
     shops.forEach((shop) => {
-      const marker = L.marker([shop.location.lat, shop.location.lng], { icon: redIcon }).addTo(map);
+      const marker = L.marker([shop.location.lat, shop.location.lng], { icon: redIcon });
 
       const popupContent = `
         <div style="min-width:160px;font-family:sans-serif;">
@@ -68,20 +76,13 @@ export default function GoogleMapView({ shops, initialCenter, initialZoom }: Goo
       `;
 
       marker.bindPopup(popupContent);
+      markerLayer.addLayer(marker);
     });
 
-    // 店舗があれば全体が見えるように調整
-    if (shops.length > 0 && !initialCenter) {
-      const bounds = L.latLngBounds(shops.map((s) => [s.location.lat, s.location.lng]));
-      map.fitBounds(bounds, { padding: [20, 20], maxZoom: 15 });
+    // initialCenterがある場合（リージョンページ等）はそこにフォーカス
+    if (initialCenter) {
+      map.setView([initialCenter.lat, initialCenter.lng], initialZoom ?? 15);
     }
-
-    mapInstanceRef.current = map;
-
-    return () => {
-      map.remove();
-      mapInstanceRef.current = null;
-    };
   }, [shops, initialCenter, initialZoom]);
 
   return (
