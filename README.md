@@ -47,6 +47,30 @@ Find 284+ shops across 23 regions with real-time "Open Now" status, inventory in
 | Chugoku / 中国 | Hiroshima (10), Okayama (7) |
 | Tohoku & Hokkaido / 東北・北海道 | Sapporo (11), Sendai (11) |
 
+### Search / 検索
+- Text search across shop names (JP/EN) and address / ショップ名・住所のテキスト検索
+- "Near Me" geolocation-based sorting / 「近くのショップ」位置情報ソート
+- "/" keyboard shortcut to focus search / "/"キーで検索フォーカス
+
+### Monetization / 収益化
+- Google AdSense integration / Google AdSense広告
+  - Infeed ads in shop list (after 5th and 15th items) / ショップ一覧内インフィード広告
+  - Display ads on shop detail pages / ショップ詳細ページのディスプレイ広告
+  - Display ads on region pages / エリアページのディスプレイ広告
+- ads.txt configured / ads.txt設定済み
+
+### Automated X/Twitter Posting / X自動投稿
+- Daily automated tweets via Vercel Cron (12:00 JST) / 毎日12:00 JSTに自動投稿
+- 3 tweet templates: Shop Spotlight (60%), Area Summary (25%), Stats (15%) / 3種類のテンプレート
+- OAuth 1.0a via twitter-api-v2 / twitter-api-v2によるOAuth 1.0a連携
+- [@cardmapjp](https://x.com/cardmapjp)
+
+### PWA / プログレッシブWebアプリ
+- Web app manifest with app icons / Webアプリマニフェスト
+- Service Worker with network-first caching / Service Worker（ネットワークファースト）
+- Offline access to shop data / オフラインでの店舗データアクセス
+- iOS home screen support / iOSホーム画面対応
+
 ### SEO
 - Dynamic sitemap.xml, robots.txt
 - JSON-LD structured data (Schema.org `Store`)
@@ -79,6 +103,9 @@ Find 284+ shops across 23 regions with real-time "Open Now" status, inventory in
 | AI | Anthropic Claude API |
 | Auth | Supabase Auth (Google OAuth) |
 | Icons | Lucide React |
+| Ads | Google AdSense |
+| Twitter/X | twitter-api-v2 (OAuth 1.0a) |
+| Cron | Vercel Cron Jobs |
 | Deployment | Vercel |
 
 ---
@@ -149,24 +176,49 @@ PostGIS `geography` type, `shops_with_coords` view, `shops_within_radius()` func
 - [x] 284 shops across 23 regions / 全国23エリア284店舗
 - [x] "Open Now" filter with Google Places API opening hours / Google Places API営業時間による「営業中」フィルター
 - [x] Google Maps with marker clustering / Google Maps + クラスタリング
+- [x] Text search + "Near Me" geolocation sorting / テキスト検索 + 近くのショップ
 - [x] Distance-based sorting / 距離順ソート
 - [x] AI-generated shop summaries (Claude API) / AI生成ショップサマリー
 - [x] Google Reviews display / Googleレビュー表示
 - [x] User auth (Google OAuth) + review system / ユーザー認証 + レビュー機能
 - [x] Admin dashboard (shops, inventory, members, reviews) / 管理画面
 - [x] SEO (sitemap, JSON-LD, OpenGraph) / SEO対策
+- [x] PWA with offline shop data / オフライン対応PWA
+- [x] Google AdSense ads / Google AdSense広告
+- [x] Automated X/Twitter posting (Vercel Cron) / X自動投稿
 
 ### Planned / 予定
+- [ ] Blog auto-generation (Claude API) / ブログ自動生成
+- [ ] City-specific SEO landing pages / 都市別SEOランディングページ
+- [ ] Game-style splash screen / ソシャゲ風起動フロー
 - [ ] Advanced multi-filter search / 複合フィルター検索
 - [ ] Bookmark / favorites / お気に入り機能
 - [ ] Photo uploads for reviews / レビュー写真アップロード
 - [ ] "I visited" check-in badges / 訪問チェックインバッジ
 - [ ] Multi-language (JA, ZH, KO, TH) / 多言語対応
-- [ ] PWA with offline map / オフラインマップPWA
 - [ ] Price trend charts / 価格推移チャート
-- [ ] Mobile app / モバイルアプリ
+- [ ] iOS app (SwiftUI + MapKit) / iOSアプリ
 - [ ] CI/CD with GitHub Actions
 - [ ] E2E tests with Playwright
+
+---
+
+## Changelog / 更新履歴
+
+### 2026-03-28
+- Google AdSense ads on shop list, detail, and region pages / AdSense広告をショップ一覧・詳細・エリアページに配置
+- ads.txt for AdSense verification / AdSense認証用ads.txt設置
+- Automated daily X/Twitter posting via Vercel Cron / Vercel Cronによる毎日自動X投稿
+
+### 2026-03-26
+- Text search across shop names and address / ショップ名・住所のテキスト検索
+- "Near Me" button with geolocation sorting / 位置情報による近くのショップ機能
+
+### 2026-03-25
+- PWA support with Service Worker and offline caching / PWA対応（Service Worker + オフラインキャッシュ）
+
+### 2026-03-24
+- "Open Now" filter fix: fetched real opening hours from Google Places API / 「営業中」フィルター修正：Google Places APIから実営業時間を取得
 
 ---
 
