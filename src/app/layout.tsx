@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import AuthButton from "@/components/AuthButton";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import "./globals.css";
@@ -72,6 +73,7 @@ export default function RootLayout({
         />
         <main>{children}</main>
         <ServiceWorkerRegistrar />
+        <Analytics />
       </body>
     </html>
   );
