@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import AuthButton from "@/components/AuthButton";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -73,6 +74,7 @@ export default function RootLayout({
         />
         <main>{children}</main>
         <ServiceWorkerRegistrar />
+                <GoogleAnalytics />
         <Analytics />
       </body>
     </html>
