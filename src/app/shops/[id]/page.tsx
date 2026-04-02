@@ -51,6 +51,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description,
+    alternates: { canonical: `/shops/${id}` },
     openGraph: { title, description, type: 'website', url: `https://cardmapjp.vercel.app/shops/${id}` },
   };
 }

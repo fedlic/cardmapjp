@@ -22,6 +22,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: config.meta_title,
     description: config.meta_description,
+    alternates: { canonical: `/regions/${slug}` },
     openGraph: {
       title: config.meta_title.replace(' | CardMapJP', ''),
       description: config.og_description,

@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   title: 'Pokemon Card Shops in Akihabara, Tokyo | CardMapJP',
   description:
     'Find the best Pokemon card shops in Akihabara, Tokyo. Interactive map with 284+ shops, real-time inventory, English support info, directions, and visitor tips for foreign collectors.',
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     title: 'Pokemon Card Shops in Akihabara, Tokyo | CardMapJP',
     description:

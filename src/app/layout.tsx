@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import AuthButton from "@/components/AuthButton";
@@ -17,10 +16,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const APP_URL = "https://cardmapjp.vercel.app";
+
 export const metadata: Metadata = {
   title: "CardMapJP — Pokemon Card Shop Finder in Japan",
   description:
     "Find the best Pokemon card shops in Akihabara and across Japan. Real-time inventory, English support info, and visitor tips for foreign collectors.",
+  metadataBase: new URL(APP_URL),
+  alternates: {
+    canonical: "/",
+  },
   manifest: "/manifest.json",
   themeColor: "#E3350D",
   appleWebApp: {
@@ -36,6 +41,22 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-touch-icon.png",
   },
+  openGraph: {
+    siteName: "CardMapJP",
+    locale: "en_US",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "CardMapJP — Pokemon Card Shop Finder in Japan",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og-image.png"],
+  },
   verification: {
     google: "DcP8asRDyzENMw-VEHqueaMAq_K4X6YyzgeIdGQF0QA",
   },
@@ -48,6 +69,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8620642498629308"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
       >
@@ -67,11 +95,6 @@ export default function RootLayout({
             <AuthButton />
           </nav>
         </header>
-        <Script
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8620642498629308"
-          strategy="afterInteractive"
-          crossOrigin="anonymous"
-        />
         <main>{children}</main>
         <footer className="border-t border-gray-200 bg-gray-50 px-4 py-6 mt-8">
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
