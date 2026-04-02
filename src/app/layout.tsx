@@ -73,6 +73,16 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <main>{children}</main>
+        <footer className="border-t border-gray-200 bg-gray-50 px-4 py-6 mt-8">
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
+            <span>&copy; {new Date().getFullYear()} CardMapJP. All rights reserved.</span>
+            <nav className="flex items-center gap-4">
+              <a href="/privacy" className="hover:text-gray-700 transition-colors">Privacy Policy</a>
+              <a href="/terms" className="hover:text-gray-700 transition-colors">Terms of Service</a>
+              <a href="mailto:info@fedlic.tokyo" className="hover:text-gray-700 transition-colors">Contact</a>
+            </nav>
+          </div>
+        </footer>
         <ServiceWorkerRegistrar />
                 <GoogleAnalytics />
         <Analytics />
