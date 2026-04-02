@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/react";
 import AuthButton from "@/components/AuthButton";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import AdSenseScript from "@/components/AdSenseScript";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -69,13 +70,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8620642498629308"
-          crossOrigin="anonymous"
-        />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
       >
@@ -107,7 +101,8 @@ export default function RootLayout({
           </div>
         </footer>
         <ServiceWorkerRegistrar />
-                <GoogleAnalytics />
+        <AdSenseScript />
+        <GoogleAnalytics />
         <Analytics />
       </body>
     </html>
