@@ -190,7 +190,7 @@ export default function ShopListClient({ shops }: ShopListClientProps) {
                 />
                 {(index === 4 || index === 14) && (
                   <div className="my-3">
-                    <AdBanner slot="6624319605" format="auto" />
+                    <AdBanner slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_INFEED || "6624319605"} format="auto" />
                   </div>
                 )}
               </div>

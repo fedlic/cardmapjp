@@ -129,7 +129,7 @@ export default async function RegionPage({ params }: PageProps) {
           </article>
 
           {/* Ad */}
-          <AdBanner slot="3579353861" format="auto" className="mb-8" />
+          <AdBanner slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_SIDEBAR || "3579353861"} format="auto" className="mb-8" />
 
           {/* Shop listing */}
           <h2 className="text-xl font-bold text-gray-900 mb-4">All {shops.length} Shops in {config.name_en}</h2>

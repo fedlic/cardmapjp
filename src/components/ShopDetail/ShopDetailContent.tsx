@@ -22,7 +22,7 @@ export default function ShopDetailContent({ shop, inventory, reviews, googleRevi
         <AISummary summary={shop.ai_summary} tips={shop.visitor_tips} />
         {inventory.length > 0 && <InventoryGrid inventory={inventory} />}
         <InfoSection shop={shop} />
-        <AdBanner slot="2671398626" format="auto" className="my-4" />
+        <AdBanner slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_DETAIL || "2671398626"} format="auto" className="my-4" />
         <ReviewList reviews={reviews} shopId={shop.id} googleReviews={googleReviews} />
       </div>
 
