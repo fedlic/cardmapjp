@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -108,11 +109,14 @@ export default function AdminMembersPage() {
                 <td className="p-3">
                   <div className="flex items-center gap-3">
                     {member.avatar_url ? (
-                      <img
+                      <Image
                         src={member.avatar_url}
                         alt=""
+                        width={32}
+                        height={32}
                         className="w-8 h-8 rounded-full"
                         referrerPolicy="no-referrer"
+                        unoptimized
                       />
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-500">

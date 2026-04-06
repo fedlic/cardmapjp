@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import ReviewForm from './ReviewForm';
@@ -27,12 +28,15 @@ function GoogleReviewCard({ review }: { review: GoogleReview }) {
     <div className="bg-white rounded-lg border border-gray-100 p-4 shadow-sm">
       <div className="flex items-start gap-3">
         {review.profile_photo_url && (
-          <img
+          <Image
             src={review.profile_photo_url}
             alt=""
+            width={32}
+            height={32}
             className="w-8 h-8 rounded-full shrink-0"
             referrerPolicy="no-referrer"
             loading="lazy"
+            unoptimized
           />
         )}
         <div className="min-w-0 flex-1">

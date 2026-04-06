@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import Link from "next/link";
+import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/react";
 import AuthButton from "@/components/AuthButton";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
@@ -7,14 +8,18 @@ import GoogleAnalytics from "@/components/GoogleAnalytics";
 import AdSenseScript from "@/components/AdSenseScript";
 import "./globals.css";
 
-const geistSans = Geist({
+const geistSans = localFont({
+  src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
-  subsets: ["latin"],
+  weight: "100 900",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
+const geistMono = localFont({
+  src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: "100 900",
+  display: "swap",
 });
 
 const APP_URL = "https://cardmapjp.vercel.app";
@@ -74,18 +79,18 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
       >
         <header className="h-12 bg-[#E3350D] text-white px-4 flex items-center justify-between shrink-0 z-50">
-          <a href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <span className="text-lg font-bold tracking-tight">
               CardMapJP
             </span>
-          </a>
+          </Link>
           <nav className="flex items-center gap-3 text-sm">
-            <a href="/" className="text-white/80 hover:text-white transition-colors">
+            <Link href="/" className="text-white/80 hover:text-white transition-colors">
               Home
-            </a>
-            <a href="/regions" className="text-white/80 hover:text-white transition-colors">
+            </Link>
+            <Link href="/regions" className="text-white/80 hover:text-white transition-colors">
               Regions
-            </a>
+            </Link>
             <AuthButton />
           </nav>
         </header>
@@ -94,8 +99,8 @@ export default function RootLayout({
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
             <span>&copy; {new Date().getFullYear()} CardMapJP. All rights reserved.</span>
             <nav className="flex items-center gap-4">
-              <a href="/privacy" className="hover:text-gray-700 transition-colors">Privacy Policy</a>
-              <a href="/terms" className="hover:text-gray-700 transition-colors">Terms of Service</a>
+              <Link href="/privacy" className="hover:text-gray-700 transition-colors">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-gray-700 transition-colors">Terms of Service</Link>
               <a href="mailto:info@fedlic.tokyo" className="hover:text-gray-700 transition-colors">Contact</a>
             </nav>
           </div>

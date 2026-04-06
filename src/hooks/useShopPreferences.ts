@@ -35,8 +35,11 @@ export function useShopPreferences(): UseShopPreferencesReturn {
   const [visited, setVisited] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    setFavorites(readIds(FAVORITES_KEY));
-    setVisited(readIds(VISITED_KEY));
+    const frameId = window.requestAnimationFrame(() => {
+      setFavorites(readIds(FAVORITES_KEY));
+      setVisited(readIds(VISITED_KEY));
+    });
+    return () => window.cancelAnimationFrame(frameId);
   }, []);
 
   const toggleFavorite = useCallback((shopId: string) => {

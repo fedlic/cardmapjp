@@ -1,7 +1,7 @@
 export const DEFAULT_CENTER = { lat: 35.6984, lng: 139.7731 }; // Akihabara
 export const DEFAULT_ZOOM = 15;
 
-export function getDirectionsUrl(lat: number, lng: number, name: string) {
+export function getDirectionsUrl(lat: number, lng: number) {
   return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_id=&travelmode=walking`;
 }
 

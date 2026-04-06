@@ -14,7 +14,10 @@ export function useInfiniteScroll<T>({
 
   // Reset when items change (filter/search)
   useEffect(() => {
-    setVisibleCount(pageSize);
+    const frameId = window.requestAnimationFrame(() => {
+      setVisibleCount(pageSize);
+    });
+    return () => window.cancelAnimationFrame(frameId);
   }, [items, pageSize]);
 
   useEffect(() => {
