@@ -26,6 +26,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
+  // Blog posts
+  let blogEntries: MetadataRoute.Sitemap = [];
+  try {
+    const { data: posts } = await supabase
+      .from('blog_posts')
+      .select('slug, published_at')
+      .order('published_at', { ascending: false });
+
+    blogEntries = (posts ?? []).map((post: { slug: string; published_at: string | null }) => ({
+      url: `${BASE_URL}/blog/${post.slug}`,
+      lastModified: post.published_at ?? new Date().toISOString(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    }));
+  } catch {
+    // ビルド時にSupabaseへ接続できない場合は空配列で継続
+  }
+
   return [
     {
       url: BASE_URL,
@@ -39,7 +57,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.7,
     },
+    {
+      url: `${BASE_URL}/blog`,
+      lastModified: new Date().toISOString(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
     ...regionEntries,
+    ...blogEntries,
     ...shopEntries,
   ];
 }
