@@ -19,9 +19,17 @@ interface BlogPost {
 }
 
 export async function generateStaticParams() {
-  const supabase = createServerClient();
-  const { data } = await supabase.from('blog_posts').select('slug');
-  return (data ?? []).map((row: { slug: string }) => ({ slug: row.slug }));
+  // ビルド時にSupabaseへ接続できない場合は空配列を返し、ISR（revalidate）に委ねる
+  try {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return [];
+    }
+    const supabase = createServerClient();
+    const { data } = await supabase.from('blog_posts').select('slug');
+    return (data ?? []).map((row: { slug: string }) => ({ slug: row.slug }));
+  } catch {
+    return [];
+  }
 }
 
 async function getPost(slug: string): Promise<BlogPost | null> {
