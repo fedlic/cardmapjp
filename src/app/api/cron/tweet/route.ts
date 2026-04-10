@@ -1,13 +1,17 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { createTwitterClient } from '@/lib/twitter';
 import { shopSpotlight, areaSummary, statsTweet } from '@/lib/tweet-templates';
 import type { ShopRow } from '@/types';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+// モジュール評価時ではなくリクエスト時にクライアントを生成する
+// （ビルド時の page data 収集中に env vars が無いとモジュール評価が失敗するため）
+function getSupabase(): SupabaseClient {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+}
 
 // Vercel Cronからのリクエストを認証
 function isAuthorized(request: Request): boolean {
@@ -27,6 +31,7 @@ function pickTweetType(): 'shop' | 'area' | 'stats' {
 }
 
 async function generateTweet(): Promise<string> {
+  const supabase = getSupabase();
   const type = pickTweetType();
 
   if (type === 'shop') {

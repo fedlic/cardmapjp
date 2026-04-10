@@ -91,6 +91,9 @@ export default function RootLayout({
             <Link href="/regions" className="text-white/80 hover:text-white transition-colors">
               Regions
             </Link>
+            <Link href="/blog" className="text-white/80 hover:text-white transition-colors">
+              Blog
+            </Link>
             <AuthButton />
           </nav>
         </header>
