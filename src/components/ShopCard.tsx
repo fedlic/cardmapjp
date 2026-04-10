@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { Shop } from '@/types';
 
 interface ShopCardProps {
@@ -17,10 +18,8 @@ function formatWalkTime(km: number): string {
 }
 
 export default function ShopCard({ shop, isOpen, distance }: ShopCardProps) {
-  const borderColor = isOpen === undefined ? 'border-gray-200' : isOpen ? 'border-green-400' : 'border-gray-300';
-
   return (
-    <a href={`/shops/${shop.id}`} className="block">
+    <Link href={`/shops/${shop.id}`} className="block">
       <div className={`bg-white rounded-[10px] shadow-sm border border-gray-100 p-4 pl-5 relative overflow-hidden hover:shadow-md transition-shadow`}>
         {/* Left color bar */}
         <div className={`absolute left-0 top-0 bottom-0 w-1 ${isOpen === undefined ? 'bg-gray-200' : isOpen ? 'bg-green-400' : 'bg-gray-300'}`} />
@@ -77,6 +76,6 @@ export default function ShopCard({ shop, isOpen, distance }: ShopCardProps) {
           </div>
         )}
       </div>
-    </a>
+    </Link>
   );
 }

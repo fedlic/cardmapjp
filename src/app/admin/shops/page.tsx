@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -124,7 +123,12 @@ export default function AdminShopsPage() {
   async function handleSave() {
     setSaving(true);
     try {
-      const { id, created_at, updated_at, inventory, region, ...body } = form as Record<string, unknown>;
+      const body = { ...(form as Record<string, unknown>) };
+      delete body.id;
+      delete body.created_at;
+      delete body.updated_at;
+      delete body.inventory;
+      delete body.region;
       const url = editingId ? `/api/admin/shops/${editingId}` : '/api/admin/shops';
       const method = editingId ? 'PUT' : 'POST';
       const res = await fetch(url, {

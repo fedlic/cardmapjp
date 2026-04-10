@@ -1,0 +1,9 @@
+import type { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'jp.cardmap.app',
+  appName: 'CardMap JP',
+  webDir: 'out'
+};
+
+export default config;

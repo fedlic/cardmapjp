@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { Shop } from '@/types';
 
 interface HeroSectionProps {
@@ -7,9 +8,9 @@ interface HeroSectionProps {
 export default function HeroSection({ shop }: HeroSectionProps) {
   return (
     <div className="bg-[#E3350D] text-white px-4 py-6">
-      <a href="/" className="text-white/70 text-sm hover:text-white transition-colors">
+      <Link href="/" className="text-white/70 text-sm hover:text-white transition-colors">
         &larr; All shops
-      </a>
+      </Link>
       <h1 className="text-2xl font-bold mt-2">{shop.name_en}</h1>
       <p className="text-white/70 text-sm mt-1">{shop.name_jp}</p>
 

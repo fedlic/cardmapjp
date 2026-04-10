@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { createServerClient } from '@/lib/supabase/server';
 import { ALL_REGION_SLUGS, getRegionConfig } from '@/lib/regions';
 import AdBanner from '@/components/AdBanner';
@@ -22,6 +23,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: config.meta_title,
     description: config.meta_description,
+    alternates: { canonical: `/regions/${slug}` },
     openGraph: {
       title: config.meta_title.replace(' | CardMapJP', ''),
       description: config.og_description,
@@ -76,7 +78,7 @@ export default async function RegionPage({ params }: PageProps) {
       <div className="max-w-3xl mx-auto">
         {/* Hero */}
         <div className="bg-[#E3350D] text-white px-4 py-8">
-          <a href="/regions" className="text-white/70 text-sm hover:text-white">&larr; All regions</a>
+          <Link href="/regions" className="text-white/70 text-sm hover:text-white">&larr; All regions</Link>
           <h1 className="text-3xl font-bold mt-2">Best Pokemon Card Shops in {config.name_en}</h1>
           <p className="text-white/80 mt-2 text-lg">{config.hero_subtitle}</p>
           <div className="flex flex-wrap gap-2 mt-4 text-sm">
@@ -84,10 +86,10 @@ export default async function RegionPage({ params }: PageProps) {
             <span className="bg-white/20 rounded-full px-3 py-1">{englishShops.length} EN Staff</span>
             <span className="bg-white/20 rounded-full px-3 py-1">{topRated.length} Top Rated</span>
           </div>
-          <a href={`/?region=${slug}`}
+          <Link href={`/?region=${slug}`}
             className="inline-block mt-4 bg-white text-[#E3350D] font-semibold rounded-lg px-5 py-2 text-sm hover:bg-white/90 transition">
             Open Interactive Map
-          </a>
+          </Link>
         </div>
 
         <div className="px-4 py-8">
@@ -129,7 +131,7 @@ export default async function RegionPage({ params }: PageProps) {
           </article>
 
           {/* Ad */}
-          <AdBanner slot="3579353861" format="auto" className="mb-8" />
+          <AdBanner slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_SIDEBAR || "3579353861"} format="auto" className="mb-8" />
 
           {/* Shop listing */}
           <h2 className="text-xl font-bold text-gray-900 mb-4">All {shops.length} Shops in {config.name_en}</h2>

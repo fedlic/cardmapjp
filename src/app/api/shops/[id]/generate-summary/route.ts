@@ -1,6 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createHmac, timingSafeEqual } from 'crypto';
 import { createServerClient } from '@/lib/supabase/server';
 import { generateShopSummary } from '@/lib/claude';
+
+function isAuthorized(request: NextRequest): boolean {
+  const authHeader = request.headers.get('authorization');
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (authHeader && serviceRoleKey && authHeader === `Bearer ${serviceRoleKey}`) {
+    return true;
+  }
+
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  const session = request.cookies.get('admin_session')?.value;
+  if (!adminPassword || !session) {
+    return false;
+  }
+
+  const [timestamp, signature] = session.split('.');
+  if (!timestamp || !signature) {
+    return false;
+  }
+
+  const expectedSignature = createHmac('sha256', adminPassword)
+    .update(timestamp)
+    .digest('hex');
+
+  const provided = Buffer.from(signature);
+  const expected = Buffer.from(expectedSignature);
+  if (provided.length !== expected.length || !timingSafeEqual(provided, expected)) {
+    return false;
+  }
+
+  const issuedAt = Number(timestamp);
+  if (!Number.isFinite(issuedAt)) {
+    return false;
+  }
+
+  const maxAgeMs = 24 * 60 * 60 * 1000;
+  return Date.now() - issuedAt <= maxAgeMs;
+}
 
 export async function POST(
   request: NextRequest,
@@ -8,9 +46,7 @@ export async function POST(
 ) {
   const { id } = await params;
 
-  // TODO: Add admin authentication check
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader || authHeader !== `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`) {
+  if (!isAuthorized(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

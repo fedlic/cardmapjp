@@ -1,5 +1,6 @@
 import { cache } from 'react';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { createServerClient } from '@/lib/supabase/server';
 import ShopDetailContent from '@/components/ShopDetail/ShopDetailContent';
 import type { Shop, ShopRow, ShopInventory, Review, GoogleReview, OpenHours } from '@/types';
@@ -51,6 +52,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description,
+    alternates: { canonical: `/shops/${id}` },
     openGraph: { title, description, type: 'website', url: `https://cardmapjp.vercel.app/shops/${id}` },
   };
 }
@@ -112,7 +114,7 @@ export default async function ShopDetailPage({ params }: PageProps) {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <p className="text-lg font-semibold text-gray-900">Shop not found</p>
-          <a href="/" className="text-sm text-[#E3350D] hover:underline mt-2 inline-block">Back to shops</a>
+          <Link href="/" className="text-sm text-[#E3350D] hover:underline mt-2 inline-block">Back to shops</Link>
         </div>
       </div>
     );

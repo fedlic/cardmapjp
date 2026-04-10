@@ -3,7 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 
 const ADMIN_PUBLIC_PATHS = ['/admin/login', '/api/admin/login'];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Skip session refresh on auth callback (PKCE code exchange handles its own cookies)
