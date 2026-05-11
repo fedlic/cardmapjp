@@ -84,6 +84,17 @@
   }
 }
 
+/* Fix Leaflet marker icon positioning broken by Tailwind preflight */
+.leaflet-default-icon-path {
+  background-image: url('https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png');
+}
+.leaflet-container img.leaflet-marker-icon,
+.leaflet-container img.leaflet-marker-shadow {
+  max-width: none !important;
+  max-height: none !important;
+  display: inline !important;
+}
+
 /* Hide scrollbar for filter chips */
 .scrollbar-hide {
   -ms-overflow-style: none;
