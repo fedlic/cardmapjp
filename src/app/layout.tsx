@@ -3,6 +3,7 @@ import Link from "next/link";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/react";
 import AuthButton from "@/components/AuthButton";
+import BottomTabBar from "@/components/BottomTabBar";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import AdSenseScript from "@/components/AdSenseScript";
@@ -91,13 +92,17 @@ export default function RootLayout({
             <Link href="/regions" className="text-white/80 hover:text-white transition-colors">
               Regions
             </Link>
-            <Link href="/blog" className="text-white/80 hover:text-white transition-colors">
+            <Link href="/feed" className="text-white/80 hover:text-white transition-colors hidden md:inline">
+              Feed
+            </Link>
+            <Link href="/blog" className="text-white/80 hover:text-white transition-colors hidden md:inline">
               Blog
             </Link>
             <AuthButton />
           </nav>
         </header>
-        <main>{children}</main>
+        <main className="pb-14 md:pb-0">{children}</main>
+        <BottomTabBar />
         <footer className="border-t border-gray-200 bg-gray-50 px-4 py-6 mt-8">
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
             <span>&copy; {new Date().getFullYear()} CardMapJP. All rights reserved.</span>
