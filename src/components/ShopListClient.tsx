@@ -117,6 +117,8 @@ export default function ShopListClient({ shops }: ShopListClientProps) {
     if (userLocation) {
       items.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
     }
+    // Push closed shops to bottom
+    items.sort((a, b) => Number(a.shop.is_closed || false) - Number(b.shop.is_closed || false));
     return items;
   }, [filtered, userLocation]);
 

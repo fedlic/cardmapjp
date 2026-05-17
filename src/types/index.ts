@@ -49,6 +49,7 @@ export interface Shop {
   google_rating: number | null;
   google_review_count: number | null;
   is_active: boolean;
+  is_closed: boolean;
   created_at: string;
   updated_at: string;
   // Joined
@@ -232,6 +233,7 @@ export interface ShopRow {
   google_rating: number | null;
   google_review_count: number | null;
   is_active: boolean;
+  is_closed: boolean;
   created_at: string;
   updated_at: string;
   inventory?: ShopInventory[];

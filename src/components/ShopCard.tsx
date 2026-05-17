@@ -18,16 +18,18 @@ function formatWalkTime(km: number): string {
 }
 
 export default function ShopCard({ shop, isOpen, distance }: ShopCardProps) {
+  const closed = shop.is_closed;
+
   return (
     <Link href={`/shops/${shop.id}`} className="block">
-      <div className={`bg-white rounded-[10px] shadow-sm border border-gray-100 p-4 pl-5 relative overflow-hidden hover:shadow-md transition-shadow`}>
+      <div className={`rounded-[10px] shadow-sm border border-gray-100 p-4 pl-5 relative overflow-hidden transition-shadow ${closed ? 'bg-gray-50 opacity-60' : 'bg-white hover:shadow-md'}`}>
         {/* Left color bar */}
-        <div className={`absolute left-0 top-0 bottom-0 w-1 ${isOpen === undefined ? 'bg-gray-200' : isOpen ? 'bg-green-400' : 'bg-gray-300'}`} />
+        <div className={`absolute left-0 top-0 bottom-0 w-1 ${closed ? 'bg-red-300' : isOpen === undefined ? 'bg-gray-200' : isOpen ? 'bg-green-400' : 'bg-gray-300'}`} />
 
         {/* Row 1: Name + Rating */}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <h3 className="font-bold text-[16px] text-gray-900 truncate">{shop.name_en}</h3>
+            <h3 className={`font-bold text-[16px] truncate ${closed ? 'text-gray-400 line-through' : 'text-gray-900'}`}>{shop.name_en}</h3>
             <p className="text-[12px] text-gray-400 truncate mt-0.5">{shop.name_jp}</p>
           </div>
           {shop.google_rating && (
@@ -40,7 +42,12 @@ export default function ShopCard({ shop, isOpen, distance }: ShopCardProps) {
 
         {/* Row 2: Badges */}
         <div className="flex flex-wrap gap-1.5 mt-2">
-          {isOpen && (
+          {closed && (
+            <span className="inline-block text-[9px] font-medium rounded px-1.5 py-0.5 bg-red-100 text-red-700">
+              Permanently Closed
+            </span>
+          )}
+          {!closed && isOpen && (
             <span className="inline-block text-[9px] font-medium rounded px-1.5 py-0.5 bg-[#DCFCE7] text-[#15803D]">
               Open
             </span>

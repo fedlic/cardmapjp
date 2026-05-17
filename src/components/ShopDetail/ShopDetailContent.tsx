@@ -16,6 +16,11 @@ interface ShopDetailContentProps {
 export default function ShopDetailContent({ shop, inventory, reviews, googleReviews }: ShopDetailContentProps) {
   return (
     <div className="max-w-2xl mx-auto pb-24">
+      {shop.is_closed && (
+        <div className="bg-red-50 border-b border-red-200 px-4 py-3 text-center">
+          <span className="text-sm font-medium text-red-700">This shop is permanently closed</span>
+        </div>
+      )}
       <HeroSection shop={shop} />
 
       <div className="px-4 py-6 space-y-6">

@@ -27,6 +27,7 @@ const BOOL_FIELDS = [
   { key: 'sells_raw_rare', label: 'Sells Raw Rare' },
   { key: 'atm_nearby', label: 'ATM Nearby' },
   { key: 'is_active', label: 'Active' },
+  { key: 'is_closed', label: 'Permanently Closed' },
 ] as const;
 
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -46,7 +47,7 @@ function emptyForm(): FormData {
     sells_singles: false, sells_booster_box: false, sells_sealed_pack: false,
     sells_psa_graded: false, sells_oripa: false, sells_english_cards: false,
     sells_vintage: false, sells_raw_rare: false, atm_nearby: false,
-    is_active: true, payment_methods: [],
+    is_active: true, is_closed: false, payment_methods: [],
     open_hours: null, region_id: '',
   };
 }
@@ -347,12 +348,19 @@ export default function AdminShopsPage() {
                   )}
                 </td>
                 <td className="p-3 hidden md:table-cell">
-                  <Badge
-                    variant={shop.is_active ? 'secondary' : 'outline'}
-                    className={shop.is_active ? 'bg-green-100 text-green-800' : ''}
-                  >
-                    {shop.is_active ? 'Active' : 'Inactive'}
-                  </Badge>
+                  <div className="flex gap-1">
+                    <Badge
+                      variant={shop.is_active ? 'secondary' : 'outline'}
+                      className={shop.is_active ? 'bg-green-100 text-green-800' : ''}
+                    >
+                      {shop.is_active ? 'Active' : 'Inactive'}
+                    </Badge>
+                    {shop.is_closed && (
+                      <Badge variant="outline" className="bg-red-100 text-red-700">
+                        Closed
+                      </Badge>
+                    )}
+                  </div>
                 </td>
                 <td className="p-3 hidden lg:table-cell text-muted-foreground">
                   {new Date(shop.updated_at).toLocaleDateString()}
