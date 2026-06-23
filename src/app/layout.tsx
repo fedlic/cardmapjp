@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/react";
+import AppDownloadBanner from "@/components/AppDownloadBanner";
 import AuthButton from "@/components/AuthButton";
 import BottomTabBar from "@/components/BottomTabBar";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
@@ -101,6 +102,7 @@ export default function RootLayout({
             <AuthButton />
           </nav>
         </header>
+        <AppDownloadBanner />
         <main className="pb-14 md:pb-0">{children}</main>
         <BottomTabBar />
         <footer className="border-t border-gray-200 bg-gray-50 px-4 py-6 mt-8">

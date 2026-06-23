@@ -72,6 +72,14 @@ Find 284+ shops across 23 regions with real-time "Open Now" status, inventory in
 - Offline access to shop data / オフラインでの店舗データアクセス
 - iOS home screen support / iOSホーム画面対応
 
+### App download links / アプリ導線
+- The header area shows App Store and Android APK download links / ヘッダー直下にApp StoreとAndroid APKの導線を表示
+- URLs are managed in `src/lib/app-downloads.ts`
+- Optional environment overrides:
+  - `NEXT_PUBLIC_CARDMAPJP_IOS_URL`
+  - `NEXT_PUBLIC_CARDMAPJP_ANDROID_APK_URL`
+- Default Android APK URL: `https://fedlic.tokyo/cardmapjp/android/cardmapjp.apk`
+
 ### SEO
 - Dynamic sitemap.xml, robots.txt
 - JSON-LD structured data (Schema.org `Store`)
@@ -116,6 +124,38 @@ Find 284+ shops across 23 regions with real-time "Open Now" status, inventory in
 | Script | Description / 説明 |
 |--------|-------------------|
 | `scripts/fetch-open-hours.mjs` | Fetch opening hours from Google Places API for all shops / 全店舗の営業時間をGoogle Places APIから取得 |
+
+---
+
+## Android APK distribution / Android APK配布
+
+Android APK is expected to be hosted on the FEDLIC TOKYO server and linked from the website.
+
+想定URL:
+
+```text
+https://fedlic.tokyo/cardmapjp/android/cardmapjp.apk
+```
+
+### Publish flow / 公開手順
+
+1. Build a signed release APK in the Android repository.
+2. Rename or copy the output APK to `cardmapjp.apk`.
+3. Upload it to the FEDLIC TOKYO server path `/cardmapjp/android/cardmapjp.apk`.
+4. Confirm the URL downloads the APK over HTTPS.
+5. If the URL changes, update `src/lib/app-downloads.ts` or set `NEXT_PUBLIC_CARDMAPJP_ANDROID_APK_URL` in Vercel.
+
+### Minimum notes for direct APK distribution / APK直接配布の注意
+
+- This is not a Google Play install. Users may need to allow installation from the browser or file manager.
+- Keep the APK signed with the same release key for every update. Android treats a different signing key as a different app update path.
+- Serve the file over HTTPS and avoid changing the package name `jp.cardmap.app`.
+- Keep versionCode increasing for every public APK.
+- Consider publishing SHA-256 checksums next to the APK if the page later becomes a full download page.
+
+### Switching to Google Play / Google Play公開への切り替え
+
+When Google Play is ready, replace the Android link with the Play Store URL in `src/lib/app-downloads.ts` or set `NEXT_PUBLIC_CARDMAPJP_ANDROID_APK_URL` to the Play Store listing URL. Update the label/note in `src/lib/app-downloads.ts` from `Android APK` / `Google Playではありません` to the store wording.
 
 ---
 
