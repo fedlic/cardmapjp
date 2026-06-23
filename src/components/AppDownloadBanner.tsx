@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Capacitor } from "@capacitor/core";
-import { Download, Smartphone, X } from "lucide-react";
+import { Apple, Download, ShieldAlert, Smartphone, X } from "lucide-react";
 import { appDownloadLinks } from "@/lib/app-downloads";
 
 const DISMISS_KEY = "cardmapjp-app-download-banner-dismissed";
@@ -43,45 +43,49 @@ export default function AppDownloadBanner() {
   return (
     <section
       aria-label="アプリをダウンロード"
-      className="border-b border-red-100 bg-red-50/90 px-4 py-2"
+      className="border-b border-red-200/70 bg-[#E3350D] px-3 py-2 text-white shadow-sm"
     >
-      <div className="mx-auto flex max-w-6xl items-start gap-2">
-        <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2 text-sm font-semibold text-[#E3350D]">
-            <Smartphone className="size-4 shrink-0" aria-hidden="true" />
-            <span>アプリをダウンロード</span>
+      <div className="mx-auto flex max-w-6xl items-center gap-2">
+        <div className="flex min-w-0 flex-1 flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-md bg-white/15 ring-1 ring-white/20">
+              <Smartphone className="size-4" aria-hidden="true" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-bold leading-tight tracking-tight">
+                CardMapJPアプリ
+              </span>
+              <span className="block truncate text-xs text-white/80">
+                地図とショップ情報をスマホでチェック
+              </span>
+            </span>
           </div>
-          <div className="grid grid-cols-1 gap-2 sm:flex sm:items-center">
+          <div className="grid grid-cols-2 gap-2 md:flex md:items-center">
             <a
               href={appDownloadLinks.ios.href}
-              className="inline-flex min-h-10 items-center justify-between gap-3 rounded-md border border-red-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors hover:border-[#E3350D] hover:text-[#E3350D]"
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-bold text-[#E3350D] shadow-sm transition hover:bg-white/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
             >
-              <span className="flex flex-col leading-tight">
-                <span className="font-semibold">{appDownloadLinks.ios.label}</span>
-                <span className="text-xs text-gray-500">{appDownloadLinks.ios.status}</span>
-              </span>
-              <span className="text-xs text-gray-500">{appDownloadLinks.ios.note}</span>
+              <Apple className="size-4 shrink-0" aria-hidden="true" />
+              <span className="truncate">{appDownloadLinks.ios.label}</span>
             </a>
             <a
               href={appDownloadLinks.android.href}
-              className="inline-flex min-h-10 items-center justify-between gap-3 rounded-md border border-red-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors hover:border-[#E3350D] hover:text-[#E3350D]"
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-gray-950 px-3 py-2 text-sm font-bold text-white shadow-sm ring-1 ring-white/15 transition hover:bg-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
             >
-              <span className="flex flex-col leading-tight">
-                <span className="font-semibold">{appDownloadLinks.android.label}</span>
-                <span className="text-xs text-gray-500">{appDownloadLinks.android.status}</span>
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-900">
-                <Download className="size-3" aria-hidden="true" />
-                {appDownloadLinks.android.note}
-              </span>
+              <Download className="size-4 shrink-0" aria-hidden="true" />
+              <span className="truncate">{appDownloadLinks.android.label}</span>
             </a>
+            <span className="col-span-2 inline-flex items-center justify-center gap-1 rounded-full bg-white/12 px-2 py-1 text-[11px] font-medium text-white/85 ring-1 ring-white/15 md:col-span-1">
+              <ShieldAlert className="size-3" aria-hidden="true" />
+              {appDownloadLinks.android.note}
+            </span>
           </div>
         </div>
         <button
           type="button"
           aria-label="アプリダウンロード案内を閉じる"
           onClick={dismissBanner}
-          className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-[#E3350D] transition-colors hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E3350D]/40"
+          className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-white/80 transition hover:bg-white/15 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
         >
           <X className="size-4" aria-hidden="true" />
         </button>
