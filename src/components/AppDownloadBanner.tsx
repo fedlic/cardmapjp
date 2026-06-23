@@ -1,24 +1,42 @@
 "use client";
 
 import { useState } from "react";
+import { Capacitor } from "@capacitor/core";
 import { Download, Smartphone, X } from "lucide-react";
 import { appDownloadLinks } from "@/lib/app-downloads";
 
 const DISMISS_KEY = "cardmapjp-app-download-banner-dismissed";
 
+function shouldShowAppDownloadBanner() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  if (Capacitor.isNativePlatform()) {
+    return false;
+  }
+
+  try {
+    return localStorage.getItem(DISMISS_KEY) !== "true";
+  } catch {
+    return true;
+  }
+}
+
 export default function AppDownloadBanner() {
-  const [isVisible, setIsVisible] = useState(
-    () =>
-      typeof window === "undefined" ||
-      localStorage.getItem(DISMISS_KEY) !== "true",
-  );
+  const [isVisible, setIsVisible] = useState(shouldShowAppDownloadBanner);
 
   if (!isVisible) {
     return null;
   }
 
   function dismissBanner() {
-    localStorage.setItem(DISMISS_KEY, "true");
+    try {
+      localStorage.setItem(DISMISS_KEY, "true");
+    } catch {
+      // The banner can still be dismissed for this session if storage is blocked.
+    }
+
     setIsVisible(false);
   }
 
